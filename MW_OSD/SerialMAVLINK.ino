@@ -550,6 +550,15 @@ void serialMAVCheck() {
       MwVBat2 = (int16_t)serialbufferint(0) / 100;
       break;
 #endif
+
+
+#ifdef MAV_PX4_DUALBAT
+      case  MAVLINK_MSG_ID_BATTERY_STATUS:
+        MwVBat = (int16_t)serialbufferint(10) / 100;
+        break;
+#endif
+
+
 #ifdef MAV_ADSB
   #ifdef ADSBDEBUG
     case MAVLINK_MSG_ID_ADSB_STATUS:
@@ -632,7 +641,9 @@ void serialMAVCheck() {
         MwSensorActive |= (1 << 2);
       if ((serialbufferint(4) & (1 << 2)) > 0) //mag
         MwSensorActive |= (1 << 3);
+#ifndef MAV_PX4_DUALBAT // use BATTERY_STATUS due to PX4 battery handling. Weird.        
       MwVBat = (uint16_t)(serialBuffer[14] | (serialBuffer[15] << 8)) / 100;
+#endif      
       MWAmperage = serialBuffer[16] | (serialBuffer[17] << 8);
       batstatus = serialBuffer[30];
       break;
@@ -817,6 +828,13 @@ void serialMAVreceive(uint8_t c)
       case  MAVLINK_MSG_ID_SYSTEM_TIME:
         mav_magic = MAVLINK_MSG_ID_SYSTEM_TIME_MAGIC;
         mav_len = MAVLINK_MSG_ID_SYSTEM_TIME_LEN;
+        break;
+#endif
+
+#ifdef MAV_PX4_DUALBAT
+      case  MAVLINK_MSG_ID_BATTERY_STATUS:
+        mav_magic = MAVLINK_MSG_ID_BATTERY_STATUS_MAGIC;
+        mav_len = MAVLINK_MSG_ID_BATTERY_STATUS_LEN;
         break;
 #endif
 
