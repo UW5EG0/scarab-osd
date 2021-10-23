@@ -982,7 +982,7 @@ uint8_t GPS_frame_timer=0;
 int32_t GPS_latitude;
 int32_t GPS_longitude;
 int32_t GPS_altitude;
-int16_t MAV_altitude;                          
+int16_t MAV_altitude;        
 int32_t GPS_altitude_ASL;
 int32_t GPS_altitude_vario;
 int32_t GPS_home_altitude;
@@ -1003,7 +1003,7 @@ uint16_t MwRssi=0;
 uint16_t FCRssi=0;
 uint16_t rssi_RangeMin = 0;
 uint16_t rssi_RangeMax = 0;     
-
+uint16_t mav_cmd_debug = 0;  
 uint32_t GPS_time = 0;
 uint16_t WIND_direction = 0;
 uint16_t WIND_speed = 0;

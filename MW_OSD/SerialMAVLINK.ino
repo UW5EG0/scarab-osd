@@ -259,6 +259,9 @@ void serialMAVCheck() {
 
   switch (mw_mav.message_cmd) {
     case MAVLINK_MSG_ID_HEARTBEAT:
+#ifdef MAV_CMD_DEBUG
+      mav_cmd_debug &= 1;
+#endif
       mode.armed      = (1 << 0);
       mode.gpshome    = (1 << 4);
       mode.gpshold    = (1 << 5);
@@ -352,6 +355,9 @@ void serialMAVCheck() {
       }
       break;
     case MAVLINK_MSG_ID_VFR_HUD:
+#ifdef MAV_CMD_DEBUG
+      mav_cmd_debug &= 10;
+#endif
 #ifdef DEBUGDPOSMAV
   timer.d0rate++;
 #endif    
@@ -381,6 +387,9 @@ void serialMAVCheck() {
       mw_mav.throttle = (int16_t)(((serialBuffer[18] | serialBuffer[19] << 8) * 10) + 1000);
       break;
     case MAVLINK_MSG_ID_ATTITUDE:
+#ifdef MAV_CMD_DEBUG
+      mav_cmd_debug &= 100;
+#endif
 #ifdef DEBUGDPOSMAV
   timer.d1rate++;
 #endif       
@@ -388,6 +397,9 @@ void serialMAVCheck() {
       MwAngle[1] = (int16_t)(serialbufferfloat(8) * 57.2958 * -10); // rad-->0.1deg
       break;
     case MAVLINK_MSG_ID_GPS_RAW_INT:
+#ifdef MAV_CMD_DEBUG
+      mav_cmd_debug &= 1000;
+#endif
 #ifdef DEBUGDPOSMAV
   timer.d2rate++;
 #endif 
@@ -435,6 +447,9 @@ void serialMAVCheck() {
       break;
 #ifdef MAV_BARO_USE_GLOB_POS 
     case MAVLINK_MSG_ID_GLOBAL_POSITION_INT:
+#ifdef MAV_CMD_DEBUG
+      mav_cmd_debug &= 10000;
+#endif
       MwAltitude = (uint32_t) (serialBuffer[16] | (uint32_t)serialBuffer[17] << 8 | (uint32_t)serialBuffer[18] << 16 | (uint32_t)serialBuffer[19] << 24)/10;    
  
       break;    
@@ -452,6 +467,9 @@ void serialMAVCheck() {
       break;
 #endif
     case MAVLINK_MSG_ID_RC_CHANNELS_RAW:
+#ifdef MAV_CMD_DEBUG
+      mav_cmd_debug &= 100000;
+#endif
 #ifdef DEBUGDPOSMAV
   timer.d3rate++;
 #endif 
