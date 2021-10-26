@@ -240,6 +240,9 @@ void request_mavlink_CMD_APM(uint8_t MAVStream, uint16_t MAVRate) {
 
 
 void serialMAVCheck() {
+#ifdef MAV_CMD_DEBUG
+     bin2dbin(mav_cmd_debug);
+#endif
 #ifdef DEBUGDPOSPACKET
   timer.packetcount++;
 #endif
@@ -260,7 +263,7 @@ void serialMAVCheck() {
   switch (mw_mav.message_cmd) {
     case MAVLINK_MSG_ID_HEARTBEAT:
 #ifdef MAV_CMD_DEBUG
-      mav_cmd_debug &= 1;
+      mav_cmd_debug |= 0b00000001;      
 #endif
       mode.armed      = (1 << 0);
       mode.gpshome    = (1 << 4);
@@ -356,7 +359,7 @@ void serialMAVCheck() {
       break;
     case MAVLINK_MSG_ID_VFR_HUD:
 #ifdef MAV_CMD_DEBUG
-      mav_cmd_debug &= 10;
+      mav_cmd_debug |= 0b00000010;
 #endif
 #ifdef DEBUGDPOSMAV
   timer.d0rate++;
@@ -387,9 +390,6 @@ void serialMAVCheck() {
       mw_mav.throttle = (int16_t)(((serialBuffer[18] | serialBuffer[19] << 8) * 10) + 1000);
       break;
     case MAVLINK_MSG_ID_ATTITUDE:
-#ifdef MAV_CMD_DEBUG
-      mav_cmd_debug &= 100;
-#endif
 #ifdef DEBUGDPOSMAV
   timer.d1rate++;
 #endif       
@@ -398,7 +398,7 @@ void serialMAVCheck() {
       break;
     case MAVLINK_MSG_ID_GPS_RAW_INT:
 #ifdef MAV_CMD_DEBUG
-      mav_cmd_debug &= 1000;
+      mav_cmd_debug |= 0b00000100;  
 #endif
 #ifdef DEBUGDPOSMAV
   timer.d2rate++;
@@ -447,9 +447,6 @@ void serialMAVCheck() {
       break;
 #ifdef MAV_BARO_USE_GLOB_POS 
     case MAVLINK_MSG_ID_GLOBAL_POSITION_INT:
-#ifdef MAV_CMD_DEBUG
-      mav_cmd_debug &= 10000;
-#endif
       MwAltitude = (uint32_t) (serialBuffer[16] | (uint32_t)serialBuffer[17] << 8 | (uint32_t)serialBuffer[18] << 16 | (uint32_t)serialBuffer[19] << 24)/10;    
  
       break;    
@@ -468,7 +465,7 @@ void serialMAVCheck() {
 #endif
     case MAVLINK_MSG_ID_RC_CHANNELS_RAW:
 #ifdef MAV_CMD_DEBUG
-      mav_cmd_debug &= 100000;
+      mav_cmd_debug |= 0b00001000;  
 #endif
 #ifdef DEBUGDPOSMAV
   timer.d3rate++;
@@ -572,7 +569,11 @@ void serialMAVCheck() {
 
 #ifdef MAV_PX4_DUALBAT
       case  MAVLINK_MSG_ID_BATTERY_STATUS:
+#ifdef MAV_CMD_DEBUG
+        mav_cmd_debug |= 0b00010000;  
+#endif
         MwVBat = (int16_t)serialbufferint(10) / 100;
+debug[3] = (int16_t)serialbufferint(10) / 100;
         break;
 #endif
 
@@ -662,6 +663,7 @@ void serialMAVCheck() {
 #ifndef MAV_PX4_DUALBAT // use BATTERY_STATUS due to PX4 battery handling. Weird.        
       MwVBat = (uint16_t)(serialBuffer[14] | (serialBuffer[15] << 8)) / 100;
 #endif      
+debug[2] = (uint16_t)(serialBuffer[14] | (serialBuffer[15] << 8)) / 100;
       MWAmperage = serialBuffer[16] | (serialBuffer[17] << 8);
       batstatus = serialBuffer[30];
       break;

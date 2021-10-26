@@ -36,14 +36,18 @@
 //#define PILOTICON                 // Enable code to display pilot ICON as an alternative to CHARACTER display. Requires GUI > 1.8.0
 
 
-//#define DEVELOPMENT               // For development set only 
+#define DEVELOPMENT               // For development set only 
 #ifdef DEVELOPMENT                  // Development pre-set test paramters only 
   #undef LOW_MEMORY 
-  #define LOW_MEMORY 200
+  #define LOW_MEMORY 20
 
   #define PHASERS 
   #define DEBUG 4                 // Enable/disable option to display OSD debug values. Define which OSD switch position to show debug on screen display 0 (default), 1 or 2. 4 for always on
-  
+
+
+#define MAV_PX4_DUALBAT
+#define MAV_CMD_DEBUG  
+
   //#define USE_VSYNC 
   //#define ADSBAWARE                 // Enables ADSB display for FC's that support ADSB via Mavlink. Currently re-purposes Mode Sensors GUI configurable item 
   //#define BUDDYFLIGHT               
@@ -64,8 +68,8 @@
   //#define GPSOSD_NMEA             // Uncomment this if you are using a NMEA compatible GPS module for a GPS based OSD
   //#define GPSOSD_UBLOX            // Uncomment this if you are using a UBLOX GPS module for a GPS based OSD
   //#define BETAFLIGHT                // Uncomment this if you are using latest BETAFLIGHT version 3.1 onwards
-  #define APM
-  //#define PX4                     // Uncomment this if you are using PIXHAWK with PX4 stack
+  //#define APM
+  #define PX4                     // Uncomment this if you are using PIXHAWK with PX4 stack
   //#define DISPLAYAVGEFFICIENCY                // Display average mAh used / per KM instead of mAh/min KMh. 
   //#define iNAV                    // Uncomment this if you are using latest iNAV version from repository (1.01 at time of this MWOSD release)
   //#define FIXEDWING               // Uncomment this if you are using fixed wing with MultiWii or Baseflight

@@ -3175,3 +3175,29 @@ void displayFont()
     screen[90+x] = x;
   }
 }
+
+int ipow(int base, int exp)
+{
+    int result = 1;
+    for (;;)
+    {
+        if (exp & 1)
+            result *= base;
+        exp >>= 1;
+        if (!exp)
+            break;
+        base *= base;
+    }
+
+    return result;
+}
+
+
+void bin2dbin(uint16_t t_bin){
+  debug[0]=0;
+  for (uint8_t i = 0; i <= 4; i++ ){
+    if (t_bin & (1<<i)){
+      debug[0] += ipow(10,i);
+    }
+  }  
+}
