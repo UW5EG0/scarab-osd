@@ -293,7 +293,7 @@ if (abs(_vCalOld[i][0] - _vRaw[i]) > 1 || abs(_vCalOld[i][1] - _vRaw[i]) > 1) { 
   }
   }
 } //end FOR
-  if (_vCheck > 300) { // many checks without updates
+  if (_vCheck > 300 && _vCalibration[0][1] - _vCalibration[0][0]> 1000 && _vCalibration[1][1] - _vCalibration[1][0]> 1000) { // many checks without updates
       _autoCalibrationStatus = CALIBRATION_STATUS_COMPLETED;
       _calibrationUse = true;
   }
@@ -420,6 +420,6 @@ int QMC5883LCompass::getAzimuth(){
 //	int rumb =
 
 
-	int a = atan2( getY(), -getX() ) * 180.0 / PI -270;
-	return a < 0 ? 360 + a : a;
+	int a = ((int)(atan2( getY(), -getX() ) * 180.0 / PI - 270 + 720)) % 360;
+	return (a < 0)?(a+360):(a);
 }

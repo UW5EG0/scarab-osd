@@ -925,6 +925,12 @@ void displayAltitude(int32_t t_alt10, int16_t t_pos, uint8_t t_icon) { // alt se
 
 void displayNumberOfSat(void)
 {
+  if (GPS_numSat < MINSATFIX) { // if GPS SATS count failed - check packetrate
+    itoa(packetrate, screenBuffer, 10);
+      MAX7456_WriteString("P", getPosition(GPS_numSatPosition) + 4);
+    MAX7456_WriteString(screenBuffer, getPosition(GPS_numSatPosition) + 5);
+
+  }
   if ((GPS_numSat < MINSATFIX) && (timer.Blink2hz)) {
     return;
   }
@@ -935,6 +941,8 @@ void displayNumberOfSat(void)
   screenBuffer[1] = SYM_SAT_R;
   itoa(GPS_numSat, screenBuffer + 2, 10);
   MAX7456_WriteString(screenBuffer, getPosition(GPS_numSatPosition));
+
+
 #else
   displayItem(GPS_numSatPosition, GPS_numSat, SYM_SAT, 0 , 0 );
 #endif
@@ -1138,19 +1146,17 @@ void displayHeadingGraph(void)
   if (!fieldIsVisible(MwHeadingGraphPosition))
     return;
   int xx;
-
-  xx = QMC5883L_sensor.getAzimuth() / 4;
+  xx = MwHeading * 4;
   xx = xx + 720 + 45;
   xx = xx / 90;
   uint16_t pos = getPosition(MwHeadingGraphPosition);
-  memcpy_P(screen + pos, headGraph + xx + 1, 9);
+  memcpy_P(screen + pos, headGraph + xx + 1, 10);
 }
 
 
 void displayHeading(void)
 {
-  /*
-    int16_t heading = MwHeading;
+  int16_t heading = MwHeading;
     if (Settings[S_HEADING360]) {
       if(heading < 0)
         heading += 360;
@@ -1164,17 +1170,35 @@ void displayHeading(void)
       screenBuffer[5]=0;
     }
     MAX7456_WriteString(screenBuffer,getPosition(MwHeadingPosition));
-  */
-  int16_t heading = MwHeading;
-  if (heading < 0)
-    heading += 360;
-  displayItem(getPosition(MwHeadingPosition), QMC5883L_sensor.getAzimuth(), SYM_ANGLE_HDG, SYM_DEGREES, 0 );
+    if (QMC5883L_sensor.getCalibrationStatus() == QMC5883L_sensor.CALIBRATION_STATUS_IN_PROGRESS)
+    {
+      /*calibration progress*/
+      ItoaPadded(QMC5883L_sensor.getCalibrationProgress()/3,screenBuffer,4,0);
+      screenBuffer[4]=SYM_PERCENT;
+      screenBuffer[5] = 0;
+      MAX7456_WriteString(screenBuffer, getPosition(MwHeadingPosition)+ LINE*2 +1);
+
+    }
+    if ((QMC5883L_sensor.getCalibrationStatus() < QMC5883L_sensor.CALIBRATION_STATUS_COMPLETED) && (timer.Blink2hz)) {
+      return;
+    }
+    if (QMC5883L_sensor.getCalibrationStatus() < QMC5883L_sensor.CALIBRATION_STATUS_COMPLETED)
+    {
+      MAX7456_WriteString("CAL ", getPosition(MwHeadingPosition) + LINE);
+      switch (QMC5883L_sensor.getCalibrationStatus()) {
+        case QMC5883L_sensor.CALIBRATION_STATUS_IN_PROGRESS: MAX7456_WriteString(" PRG", getPosition(MwHeadingPosition)+ LINE + 3);
+        break;
+        case QMC5883L_sensor.CALIBRATION_STATUS_COMPLETED: MAX7456_WriteString(" OK", getPosition(MwHeadingPosition)+ LINE + 3); break;
+
+      };
+
+    }
 }
 
 
 void displayAngleToHome(void)
 {
-  /*
+
     if(!GPS_fix)
       return;
     if(!fieldIsVisible(GPS_angleToHomePosition))
@@ -1183,7 +1207,7 @@ void displayAngleToHome(void)
       screenBuffer[3] = SYM_DEGREES;
       screenBuffer[4] = 0;
       MAX7456_WriteString(screenBuffer,getPosition(GPS_angleToHomePosition));
-  */
+
   displayItem(GPS_angleToHomePosition, GPS_directionToHome, SYM_ANGLE_RTH, SYM_DEGREES, 0 );
 
 }

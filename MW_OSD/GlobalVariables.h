@@ -612,6 +612,7 @@ enum Setting_ {
   S_AAT,
   S_TIMER1,
   S_TIMER2,
+  S_HEADING360,
   S_CUSTOM,
   // EEPROM_SETTINGS must be last!
   EEPROM_SETTINGS
@@ -685,8 +686,8 @@ DEF_S_MWRSSI, //   S_MWRSSI,
 8, //   S_RSSI_CH,
 DEF_S_TX_TYPE, // S_TX_TYPE
 0, //   S_VOLTAGEMIN,
-4, //   S_BATCELLS,
-200, //   S_DIVIDERRATIO,
+6, //   S_BATCELLS,
+205, //   S_DIVIDERRATIO,
 DEF_S_MAINVOLTAGE_VBAT, //   S_MAINVOLTAGE_VBAT,
 3, //   S_SIDEBARHEIGHT,
 DEF_S_MWAMPERAGE, //   S_MWAMPERAGE,
@@ -694,7 +695,7 @@ DEF_S_MWAMPERAGE, //   S_MWAMPERAGE,
 1, //   S_MAV_SYS_ID,   //MAVLINK SYS id
 1, //   S_ALARMS_TEXT,
 1, // S_CALLSIGN_ALWAYS
-200, //   S_VIDDIVIDERRATIO,
+205, //   S_VIDDIVIDERRATIO,
 0, //   S_THROTTLE_PWM,
 50, //   S_AMPER_HOUR_ALARM,
 100, //   S_AMPERAGE_ALARM,
@@ -751,6 +752,7 @@ DEF_S_ALTRESOLUTION,     // S_ALTRESOLUTION
 0,      // S_AAT
 0,      // S_TIMER1
 3,      // S_TIMER2
+0,      // S_HEADING360
 0,      // S_CUSTOM
 };
 
@@ -842,33 +844,33 @@ uint16_t screenPosition[POSITIONS_SETTINGS];
 
 PROGMEM const uint16_t SCREENLAYOUT_DEFAULT[POSITIONS_SETTINGS] = {
 (LINE02+2)|DISPLAY_ALWAYS|DISPLAY_DEV,    // GPS_numSatPosition
-(LINE02+20)|DISPLAY_ALWAYS|DISPLAY_DEV,   // GPS_directionToHomePosition
-(LINE02+22)|DISPLAY_ALWAYS|DISPLAY_DEV,   // GPS_distanceToHomePosition
-(LINE07+2)|DISPLAY_ALWAYS|DISPLAY_DEV,    // GPS_speedPosition
+(LINE02+20)|DISPLAY_NEVER|DISPLAY_DEV,   // GPS_directionToHomePosition
+(LINE02+24)|DISPLAY_ALWAYS|DISPLAY_DEV,   // GPS_distanceToHomePosition
+(LINE07+2)|DISPLAY_NEVER|DISPLAY_DEV,    // GPS_speedPosition
 (LINE05+23)|DISPLAY_NEVER|DISPLAY_DEV,    // GPS_angleToHomePosition
 (LINE06+23)|DISPLAY_NEVER|DISPLAY_DEV,    // MwGPSAltPosition
 (LINE02+6)|DEF_sensorPosition|DISPLAY_DEV,    // sensorPosition
 (LINE04+23)|DISPLAY_ALWAYS|DISPLAY_DEV,    // MwHeadingPosition
-(LINE02+10)|DISPLAY_ALWAYS|DISPLAY_DEV,   // MwHeadingGraphPosition
-(LINE07+23)|DISPLAY_ALWAYS|DISPLAY_DEV,   // MwAltitudePosition
-(LINE07+22)|DISPLAY_ALWAYS|DISPLAY_DEV,   // MwVarioPosition
-(LINE12+22)|DISPLAY_ALWAYS|DISPLAY_DEV,   // CurrentThrottlePosition
+(LINE02+11)|DISPLAY_ALWAYS|DISPLAY_DEV,   // MwHeadingGraphPosition
+(LINE07+23)|DISPLAY_NEVER|DISPLAY_DEV,   // MwAltitudePosition
+(LINE07+22)|DISPLAY_NEVER|DISPLAY_DEV,   // MwVarioPosition
+(LINE12+22)|DISPLAY_NEVER|DISPLAY_DEV,   // CurrentThrottlePosition
 (LINE11+22)|DISPLAY_NEVER|DISPLAY_DEV,    // Timer2Position
 (LINE13+22)|DISPLAY_ALWAYS|DISPLAY_DEV,   // Timer1Position
-(LINE11+11)|DISPLAY_ALWAYS|DISPLAY_DEV,   // motorArmedPosition
+(LINE11+11)|DISPLAY_NEVER|DISPLAY_DEV,   // motorArmedPosition
 (LINE10+22)|DISPLAY_NEVER|DISPLAY_DEV,    // pitchAnglePosition
 (LINE11+22)|DISPLAY_NEVER|DISPLAY_DEV,    // rollAnglePosition
 (LINE01+2)|DISPLAY_ALWAYS|DISPLAY_DEV,    // MwGPSLatPositionTop         On top of screen
 (LINE01+15)|DISPLAY_ALWAYS|DISPLAY_DEV,   // MwGPSLonPositionTop         On top of screen
-(LINE12+2)|DISPLAY_ALWAYS|DISPLAY_DEV,    // rssiPosition
+(LINE03+2)|DISPLAY_ALWAYS|DISPLAY_DEV,    // rssiPosition
 (LINE09+23)|DISPLAY_NEVER|DISPLAY_DEV,     // temperaturePosition
 (LINE13+2)|DISPLAY_ALWAYS|DISPLAY_DEV,    // voltagePosition
 (LINE11+2)|DISPLAY_NEVER|DISPLAY_DEV,     // vidvoltagePosition
-(LINE13+9)|DISPLAY_ALWAYS|DISPLAY_DEV,    // amperagePosition
-(LINE13+16)|DISPLAY_ALWAYS|DISPLAY_DEV,   // pMeterSumPosition
-(LINE07+14)|DEF_horizonPosition|DISPLAY_DEV,   // horizonPosition
-(LINE07+7)|DISPLAY_ALWAYS|DISPLAY_DEV,    // SideBarPosition
-(LINE07+7)|DISPLAY_NEVER|DISPLAY_DEV,     // SideBarScrollPosition        Move to 8 bit
+(LINE13+9)|DISPLAY_NEVER|DISPLAY_DEV,    // amperagePosition
+(LINE13+16)|DISPLAY_NEVER|DISPLAY_DEV,   // pMeterSumPosition
+(LINE07+15)|DEF_horizonPosition|DISPLAY_DEV,   // horizonPosition
+(LINE07+10)|DISPLAY_ALWAYS|DISPLAY_DEV,    // SideBarPosition
+(LINE07+8)|DISPLAY_NEVER|DISPLAY_DEV,     // SideBarScrollPosition        Move to 8 bit
 (LINE01+3)|DISPLAY_NEVER,                 // Special function do not use
 (LINE01+7)|DISPLAY_NEVER,                 // Special function do not use
 (LINE04+2)|DISPLAY_NEVER|DISPLAY_DEV,     // Batstatus% Position (mavlink)
@@ -877,9 +879,9 @@ PROGMEM const uint16_t SCREENLAYOUT_DEFAULT[POSITIONS_SETTINGS] = {
 (LINE03+2)|DEF_modePosition|DISPLAY_DEV,  // modePosition
 (LINE02+22)|DISPLAY_NEVER,                // MapModePosition
 (LINE07+15)|DISPLAY_NEVER,                // MapCenterPosition
-(LINE04+10)|DISPLAY_ALWAYS|DISPLAY_DEV,   // APstatusPosition
+(LINE04+10)|DISPLAY_NEVER|DISPLAY_DEV,   // APstatusPosition
 (LINE10+2)|DISPLAY_NEVER|DISPLAY_DEV,     // wattPosition
-(LINE07+6)|DISPLAY_ALWAYS|DISPLAY_DEV,    // glidescopePosition          Only enabled in fixedwing options
+(LINE07+8)|DISPLAY_NEVER|DISPLAY_DEV,    // glidescopePosition          Only enabled in fixedwing options
 (LINE12+12)|DISPLAY_NEVER|DISPLAY_DEV,    // callSignPosition
 (LINE08+10)|DISPLAY_NEVER|DISPLAY_DEV,    // Debug Position
 (LINE08+23)|DISPLAY_NEVER|DISPLAY_DEV,    // climbratevaluePosition,
@@ -1054,7 +1056,10 @@ uint16_t flyTime=1;
 
 // For Heading
 const char headGraph[] PROGMEM = {
-  0x1d,0x1a,0x1d,0x1c,0x1d,0x19,0x1d,0x1c,0x1d,0x1b,0x1d,0x1c,0x1d,0x18,0x1d,0x1c,0x1d,0x1a,0x1d,0x1c,0x1d,0x19,0x1d,0x1c,0x1d,0x1b,0x1d};
+// -    E    -    |    -    S    -    |    -    W    -    |    -    N    -    |
+  0x1d,0x1a,0x1d,0x1c,0x1d,0x19,0x1d,0x1c,0x1d,0x1b,0x1d,0x1c,0x1d,0x18,0x1d,0x1c,
+  0x1d,0x1a,0x1d,0x1c,0x1d,0x19,0x1d,0x1c,0x1d,0x1b,0x1d,0x1c,0x1d,0x18,0x1d,0x1c,
+  0x1d,0x1a,0x1d,0x1c};
 static int16_t MwHeading=0;
 
 // For Amperage
@@ -1306,8 +1311,8 @@ const char introtext0[] PROGMEM = MWVERS;
 const char introtext1[]  PROGMEM = "MENU:THRT MIDDLE";
 const char introtext2[]  PROGMEM = "    +YAW RIGHT";
 const char introtext3[]  PROGMEM = "    +PITCH FULL";
-const char introtext4[]  PROGMEM = "ID:";
-const char introtext5[]  PROGMEM = "SI:";
+const char introtext4[]  PROGMEM = "GLORY_TO_UKRAINE";
+const char introtext5[]  PROGMEM = "      RUSNI_PI3DA";
 const char introtext6[]  PROGMEM = "FC:";
 const char introtextblank[]  PROGMEM = "";
 
