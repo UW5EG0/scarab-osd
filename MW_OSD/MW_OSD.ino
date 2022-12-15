@@ -249,6 +249,7 @@ void setup()
 #if defined USEQMC5883L
 QMC5883L_sensor.setReset();
 QMC5883L_sensor.init();
+QMC5883L_sensor.setSmoothing(3, true);
 QMC5883L_sensor.launchAutoCalibration();
 //QMC5883L_sensor.setReset();
 #endif // USE QMC5883L compass

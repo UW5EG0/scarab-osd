@@ -41,7 +41,9 @@ protected:
 	bool _smoothAdvanced = false;
     byte _ADDR = 0x0D;
 	int _vRaw[3] = {0,0,0};
-	int _vHistory[6][3];
+	int _vHistory[10][3];
+  int _vCalOld[3][2];
+  int _vHdgOld = 0;
 	int _vScan = 0;
 	int _vCheck=0;
 	long _vTotals[3] = {0,0,0};

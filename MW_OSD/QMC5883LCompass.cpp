@@ -69,7 +69,7 @@ QMC5883LCompass::QMC5883LCompass() {
 void QMC5883LCompass::init(){
 	Wire.begin();
 	_writeReg(0x0B,0x01);
-	setMode(0x01,0x0C,0x10,0X00);
+	setMode(0x01,0x04,0x10,0X00);
 }
 
 
@@ -177,7 +177,7 @@ void QMC5883LCompass::read(){
 			_vCalibration[2][0] = _vRaw[2];
 			_vCalibration[2][1] = _vRaw[2];
 		}
-		if ( _calibrationUse ) {
+		if ( _calibrationUse || _autoCalibrationStatus == CALIBRATION_STATUS_IN_PROGRESS) {
 			_applyCalibration();
 		}
 
@@ -211,7 +211,7 @@ void QMC5883LCompass::_applyCalibration(){
 	int y_avg_delta = (_vCalibration[1][1] - _vCalibration[1][0])/2;
 	int z_avg_delta = (_vCalibration[2][1] - _vCalibration[2][0])/2;
 
-	int avg_delta = (x_avg_delta + y_avg_delta)/2;// + z_avg_delta) / 3;
+	int avg_delta = (x_avg_delta + y_avg_delta + z_avg_delta) / 3;
 
 	float x_scale = (float)avg_delta / x_avg_delta;
 	float y_scale = (float)avg_delta / y_avg_delta;
@@ -257,22 +257,24 @@ void QMC5883LCompass::autoCalibrationTick(){
 	{
 		_vCheck++;
 		_vCalibration[0][0] = _vRaw[0];
-		_vHistory[0][0] = _vRaw[0];
+		_vCalOld[0][0] = _vRaw[0];
 		_vCalibration[0][1] = _vRaw[0];
 		_vCalibration[1][0] = _vRaw[1];
-		_vHistory[0][1] = _vRaw[1];
+		_vCalOld[1][0] = _vRaw[1];
 		_vCalibration[1][1] = _vRaw[1];
 		_vCalibration[2][0] = _vRaw[2];
-		_vHistory[0][2] = _vRaw[2];
+		_vCalOld[2][0] = _vRaw[2];
 		_vCalibration[2][1] = _vRaw[2];
 
 	} else {
 
 _autoCalibrationStatus = CALIBRATION_STATUS_IN_PROGRESS;
+_applyCalibration();
 for (int i = 0; i < 3; i++){
-if (abs(_vHistory[0][i] - _vRaw[i]) > 1 || abs(_vHistory[1][i] - _vRaw[i]) > 1) { // motion detection
-  if (abs(_vRaw[i] - _vCalibration[i][0]) <30 || abs(_vRaw[i] - _vCalibration[i][1]) <30 ){
+if (abs(_vCalOld[i][0] - _vRaw[i]) > 1 || abs(_vCalOld[i][1] - _vRaw[i]) > 1) { // motion detection
+  if (abs(getAzimuth() - _vHdgOld) > 0){
     //if motion detected and vRaw[axis] too close to edge - increment to calibration constant
+		_vHdgOld = getAzimuth();
     _vCheck++;
   }
 
@@ -280,40 +282,21 @@ if (abs(_vHistory[0][i] - _vRaw[i]) > 1 || abs(_vHistory[1][i] - _vRaw[i]) > 1) 
   if (_vCalibration[i][0] > _vRaw[i])
   {
     _vCalibration[i][0] = _vRaw[i];
-		_vHistory[0][i] = _vRaw[i];
+		_vCalOld[i][0] = _vRaw[i];
     _vCheck=0;
   }
     if (_vCalibration[i][1] < _vRaw[i])
   {
     _vCalibration[i][1] = _vRaw[i];
-		_vHistory[1][i] = _vRaw[i];
+		_vCalOld[i][1] = _vRaw[i];
     _vCheck=0;
   }
   }
-  int x_offset = (_vCalibration[0][0] + _vCalibration[0][1])/2;
-  int y_offset = (_vCalibration[1][0] + _vCalibration[1][1])/2;
-  int z_offset = (_vCalibration[2][0] + _vCalibration[2][1])/2;
-  int x_avg_delta = (_vCalibration[0][1] - _vCalibration[0][0])/2;
-  int y_avg_delta = (_vCalibration[1][1] - _vCalibration[1][0])/2;
-  int z_avg_delta = (_vCalibration[2][1] - _vCalibration[2][0])/2;
-  if (abs (z_avg_delta - (x_avg_delta + y_avg_delta)/2) > 200){ // Z calibrated like a hell
-      z_offset = (x_offset + y_offset)/2;
-      if (_vCalibration[2][1] - z_offset > z_offset - _vCalibration[2][0]) {
-    //    _vCalibration[2][0]--;
-      }
-      if (_vCalibration[2][1] - z_offset < z_offset - _vCalibration[2][0]) {
-    //    _vCalibration[2][1]++;
-      }
-
-  }
-
-
 } //end FOR
-  if (_vCheck > 1000) { // too many checks without updates
+  if (_vCheck > 300) { // many checks without updates
       _autoCalibrationStatus = CALIBRATION_STATUS_COMPLETED;
       _calibrationUse = true;
   }
-
 }
 }
 /**
@@ -426,8 +409,6 @@ int QMC5883LCompass::_get(int i){
 	return _vRaw[i];
 }
 
-
-
 /**
 	GET AZIMUTH
 	Calculate the azimuth (in degrees);
@@ -436,6 +417,9 @@ int QMC5883LCompass::_get(int i){
 	@return int azimuth
 **/
 int QMC5883LCompass::getAzimuth(){
-	int a = atan2( getY(), getX() ) * 180.0 / PI;
+//	int rumb =
+
+
+	int a = atan2( getY(), -getX() ) * 180.0 / PI -270;
 	return a < 0 ? 360 + a : a;
 }

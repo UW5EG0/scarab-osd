@@ -2228,9 +2228,15 @@ MAX7456_WriteString(screenBuffer, DEBUGPOSMAGDATA + LINE*3 + 2);
 MAX7456_WriteString("RZ", DEBUGPOSMAGDATA+LINE*4);
 itoa(QMC5883L_sensor.getRawZ(), screenBuffer, 10);
 MAX7456_WriteString(screenBuffer, DEBUGPOSMAGDATA + LINE*4 + 2);
-MAX7456_WriteString("CAL", DEBUGPOSMAGDATA+LINE*5);
-itoa(QMC5883L_sensor.getCalibrationStatus(), screenBuffer, 10);
-MAX7456_WriteString(screenBuffer, DEBUGPOSMAGDATA + LINE*5 + 3);
+MAX7456_WriteString("CL ", DEBUGPOSMAGDATA+LINE*5);
+switch (QMC5883L_sensor.getCalibrationStatus()) {
+  case QMC5883L_sensor.CALIBRATION_STATUS_LAUNCHED: MAX7456_WriteString("LCH", DEBUGPOSMAGDATA + LINE*5 + 3); break;
+  case QMC5883L_sensor.CALIBRATION_STATUS_IN_PROGRESS: MAX7456_WriteString("PRG", DEBUGPOSMAGDATA + LINE*5 + 3); break;
+  case QMC5883L_sensor.CALIBRATION_STATUS_COMPLETED: MAX7456_WriteString(" OK", DEBUGPOSMAGDATA + LINE*5 + 3); break;
+  case QMC5883L_sensor.CALIBRATION_STATUS_MANUAL_SET: MAX7456_WriteString("MAN", DEBUGPOSMAGDATA + LINE*5 + 3); break;
+  case QMC5883L_sensor.CALIBRATION_STATUS_UNDEFINED:
+  default: MAX7456_WriteString("---", DEBUGPOSMAGDATA + LINE*5 + 3); break;
+};
 MAX7456_WriteString("CHK", DEBUGPOSMAGDATA+LINE*6);
 itoa(QMC5883L_sensor.getCalibrationProgress(), screenBuffer, 10);
 MAX7456_WriteString(screenBuffer, DEBUGPOSMAGDATA + LINE*6 + 3);
