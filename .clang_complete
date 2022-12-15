@@ -10,7 +10,7 @@
 -IC:/Users/user/.platformio/packages/toolchain-atmelavr/lib/gcc/avr/7.3.0/include
 -IC:/Users/user/.platformio/packages/toolchain-atmelavr/lib/gcc/avr/7.3.0/include-fixed
 -IC:/Users/user/.platformio/packages/toolchain-atmelavr/avr/include
--DPLATFORMIO=60104
+-DPLATFORMIO=60105
 -DARDUINO_AVR_PRO
 -DF_CPU=16000000L
 -DARDUINO_ARCH_AVR

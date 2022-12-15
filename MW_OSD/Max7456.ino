@@ -75,10 +75,13 @@
 #define MAX7456ADD_RB15         0x1f
 #define MAX7456ADD_OSDBL        0x6c
 #define MAX7456ADD_STAT         0xA0
-#define MAX7456ADD_VM0_READ     0x80  
+#define MAX7456ADD_VM0_READ     0x80
 
 // Goods for tidiness
 #define VIDEO_MODE (flags.signaltype ? VIDEO_MODE_PAL : VIDEO_MODE_NTSC)
+#define MAX7456_HORIZONTAL_OFFSET 0
+#define MAX7456_VERTICAL_OFFSET 4
+
 
 uint8_t detectedCamType = 0;
 
@@ -138,7 +141,7 @@ void MAX7456Setup(void)
   MAX7456DISABLE
 
   MAX7456HWRESET
-  
+
   // SPCR = 01010000
   //interrupt disabled,spi enabled,msb 1st,master,clk low when idle,
   //sample on leading edge of clk,system clock/4 rate (4 meg)
@@ -147,8 +150,8 @@ void MAX7456Setup(void)
   SPCR = 0;
   SPCR = (1<<SPE)|(1<<MSTR);
   SPSR |= 1;
-  byte tmp = SPSR; // Apparently have to read twice to clear errors. Unconfirmed 
-  tmp = SPDR;  
+  byte tmp = SPSR; // Apparently have to read twice to clear errors. Unconfirmed
+  tmp = SPDR;
 
 #ifdef MAX_SOFTRESET
   MAX7456SoftReset();
@@ -159,9 +162,9 @@ void MAX7456Setup(void)
   uint8_t srdata;
   delay(1000/10);                  // Extra delay for input sync detection. 4 frames
   flags.signalauto = 2;            // default - not detected
-  flags.signaltype = 0;            // default - NTSC    
+  flags.signaltype = 0;            // default - NTSC
   spi_transfer(MAX7456ADD_STAT);
-  srdata = spi_transfer(0xFF); 
+  srdata = spi_transfer(0xFF);
   detectedCamType = srdata;
   detectedCamType &= B00000111;
   if ((srdata & B00000100) > 0)           // No signal
@@ -170,25 +173,25 @@ void MAX7456Setup(void)
   MAX_screen_rows=13;
   MAX7456_reset = 0x08;
   if (detectedCamType == B00000001){      // PAL
-    flags.signaltype = 1; 
-    flags.signalauto = 1; 
+    flags.signaltype = 1;
+    flags.signalauto = 1;
     MAX7456_reset = 0x48;
     MAX_screen_size = 480;
-    MAX_screen_rows = 16;  
+    MAX_screen_rows = 16;
     }
   else if (detectedCamType == B00000010){ // NTSC
-    flags.signalauto = 0; 
+    flags.signalauto = 0;
   }
 
   // Set up the Max chip. Enable display + set standard.
   MAX7456_Send(MAX7456ADD_VM0, MAX7456_reset);
   delay(1);
-   
+
 #ifdef FASTPIXEL // force fast pixel timing helps with ghosting for some cams
   MAX7456_Send(MAX7456ADD_OSDM, 0x00);
 #endif
 
-#ifdef BWBRIGHTNESS // change charactor black/white level brightess from default 
+#ifdef BWBRIGHTNESS // change charactor black/white level brightess from default
   uint8_t x;
   for(x = 0; x < MAX_screen_rows; x++) {
     MAX7456_Send(MAX7456ADD_RB0+x, Settings[S_BRIGHTNESS]);
@@ -266,7 +269,7 @@ ISR(INT0_vect) {
 #endif
 }
 
-    
+
 void MAX7456_DrawScreen() {
   if (displayReady!=true)
     return;
@@ -277,13 +280,16 @@ void MAX7456_DrawScreen() {
   MAX7456ENABLE
   MAX7456_Send(MAX7456ADD_DMAH, 0);
   MAX7456_Send(MAX7456ADD_DMAL, 0);
+  MAX7456_Send(MAX7456ADD_HOS, 0b00011111 & (0b00010000 + MAX7456_VERTICAL_OFFSET ));
+  MAX7456_Send(MAX7456ADD_VOS, 0b00011111 & (0b00010000 + MAX7456_VERTICAL_OFFSET ));
   MAX7456_Send(MAX7456ADD_DMM,  1);
-  MAX7456DISABLE  
+
+  MAX7456DISABLE
   for(; screen_address < end_address;) {
     MAX7456ENABLE
     SPDR = *screen_address;
     while (!(SPSR & (1<<SPIF))) ;
-    MAX7456DISABLE        
+    MAX7456DISABLE
     *screen_address++=0x20;
   }
   vsync_timer = millis();
@@ -329,12 +335,12 @@ void write_NVM(uint8_t char_address)
 
   // transfer 54 bytes from shadow ram to NVM
   MAX7456_Send(MAX7456ADD_CMM, WRITE_nvr);
-  
+
   // wait until bit 5 in the status register returns to 0 (12ms)
   while ((spi_transfer(MAX7456ADD_STAT) & STATUS_reg_nvr_busy) != 0x00);
 
   MAX7456_Send(MAX7456ADD_VM0, OSD_ENABLE|VERTICAL_SYNC_NEXT_VSYNC|VIDEO_MODE); // turn on screen next vertical
-  MAX7456DISABLE  
+  MAX7456DISABLE
   delay(20);
 #else
   delay(12);
@@ -350,12 +356,12 @@ void MAX7456CheckStatus(void){
   {
   MAX7456ENABLE
   spi_transfer(MAX7456ADD_STAT);
-  srdata = spi_transfer(0xFF); 
+  srdata = spi_transfer(0xFF);
   srdata &= B00000111;
   if ((srdata & B00000100) > 0)           // No signal
     srdata = 0;
   MAX7456DISABLE
-  }//ATOMIC_BLOCK(ATOMIC_RESTORESTATE)  
+  }//ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
 
   if (detectedCamType != srdata) {
     MAX7456Setup();
@@ -364,23 +370,23 @@ void MAX7456CheckStatus(void){
 
   //ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
   {
-  MAX7456ENABLE 
+  MAX7456ENABLE
   spi_transfer(MAX7456ADD_VM0_READ);
-  srdata = spi_transfer(0xFF); 
+  srdata = spi_transfer(0xFF);
   MAX7456DISABLE
 
-  }//ATOMIC_BLOCK(ATOMIC_RESTORESTATE) 
-  
+  }//ATOMIC_BLOCK(ATOMIC_RESTORESTATE)
+
   if ((B00001000 & srdata) == 0){
-    MAX7456Setup(); 
-  }   
+    MAX7456Setup();
+  }
   displayReady = t_displayReady;
 }
 
 
 #if defined LOADFONT_DEFAULT || defined LOADFONT_LARGE || defined LOADFONT_BOLD
 void updateFont()
-{ 
+{
   for(uint8_t x = 0; x < 255; x++){
     for(uint8_t i = 0; i < 54; i++){
       serialBuffer[1+i] = (uint8_t)pgm_read_byte(fontdata+(64*x)+i);

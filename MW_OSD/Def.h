@@ -6,9 +6,9 @@
 /*----------------------------------------------       Developer / debug parameters      ----------------------------------------------------*/
 
 // Display Debug screen display options
-//#define DEBUGMW            // Enable to display MSP debug values (assumes debug[x] values are not set elsewhere) 
+//#define DEBUGMW            // Enable to display MSP debug values (assumes debug[x] values are not set elsewhere)
 #define DEBUGDPOSMENU 3      // dispaly debug title at position X
-#define DEBUGDPOSRCDATA 33   // display RCDATA values at position X
+//#define DEBUGDPOSRCDATA 33   // display RCDATA values at position X
 #define DEBUGDPOSANAL 84     // display sensor values at position X
 #define DEBUGDPOSPWM 264     // display PWM values at position X
 #define DEBUGDPOSVAL 40      // display debug values at position X
@@ -18,17 +18,18 @@
 #define DEBUGDPOSPACKET 280  // display serial packet rate rate value at position X
 #define DEBUGDPOSMEMORY 310  // display free heap/stack memory at position X. Requires MEMCHECK and not valid in latest Arduino versions
 #define DEBUGDPOSRX 220      // display serial data rate at position X
+#define DEBUGPOSMAGDATA 33       // display compass data over RC
 //#define DEBUGDPOSMSPID 33  // display MSP ID received
 //#define DEBUGDPOSMAV       // display d0-3 as mav packet rates for VFR_HUD, Attitude, GPS raw, RC raw
 
 //#define DEBUG 4                   // Enable/disable option to display OSD debug values. Define which OSD switch position to show debug on screen display 0 (default), 1 or 2. 4 for always on
 
 // Display Debug text message in standard screen text warning message area
-// Enable and set debugtext=1 in code when required 
+// Enable and set debugtext=1 in code when required
 //#define DEBUGTEXT "DEBUG"    // Set text you wish to display when debug text message required. Must be CAPSLOCK text
 
-#define HARDRESET            // Enables watchdog timer reset rather than fixed memory jmp 
-//#define BOOTRESET          // Enables reset from default Atmega 328 bootloader address (instead of 0) 
+#define HARDRESET            // Enables watchdog timer reset rather than fixed memory jmp
+//#define BOOTRESET          // Enables reset from default Atmega 328 bootloader address (instead of 0)
 
 
 /********************           Under development           *********************/
@@ -36,25 +37,25 @@
 //#define PILOTICON                 // Enable code to display pilot ICON as an alternative to CHARACTER display. Requires GUI > 1.8.0
 
 
-//#define DEVELOPMENT               // For development set only 
-#ifdef DEVELOPMENT                  // Development pre-set test paramters only 
-  #undef LOW_MEMORY 
+//#define DEVELOPMENT               // For development set only
+#ifdef DEVELOPMENT                  // Development pre-set test paramters only
+  #undef LOW_MEMORY
   #define LOW_MEMORY 200
 
-  #define PHASERS 
+  #define PHASERS
   #define DEBUG 4                 // Enable/disable option to display OSD debug values. Define which OSD switch position to show debug on screen display 0 (default), 1 or 2. 4 for always on
-  
-  //#define USE_VSYNC 
-  //#define ADSBAWARE                 // Enables ADSB display for FC's that support ADSB via Mavlink. Currently re-purposes Mode Sensors GUI configurable item 
-  //#define BUDDYFLIGHT               
+
+  //#define USE_VSYNC
+  //#define ADSBAWARE                 // Enables ADSB display for FC's that support ADSB via Mavlink. Currently re-purposes Mode Sensors GUI configurable item
+  //#define BUDDYFLIGHT
   //#undef GPSTIME
   //#undef MAPMODE
   //#undef HORIZON
   //#undef MAV_STATUS
-  //#undef USEGLIDESCOPE 
-  //#undef INTRO_MENU                  // Enable to display TX stick MENU 
+  //#undef USEGLIDESCOPE
+  //#undef INTRO_MENU                  // Enable to display TX stick MENU
   //#undef INTRO_CALLSIGN              // Enable to display callsign at startup
-  //#undef INTRO_SIGNALTYPE   
+  //#undef INTRO_SIGNALTYPE
   //#define MAV_ADSB
   //#define ADSBSTATION 5
   //#define AIRBOTMICRO             // Uncomment this if using an airbot MicroOSD
@@ -64,20 +65,20 @@
   //#define GPSOSD_NMEA             // Uncomment this if you are using a NMEA compatible GPS module for a GPS based OSD
   //#define GPSOSD_UBLOX            // Uncomment this if you are using a UBLOX GPS module for a GPS based OSD
   //#define BETAFLIGHT                // Uncomment this if you are using latest BETAFLIGHT version 3.1 onwards
-  #define APM
+  //#define APM
   //#define PX4                     // Uncomment this if you are using PIXHAWK with PX4 stack
-  //#define DISPLAYAVGEFFICIENCY                // Display average mAh used / per KM instead of mAh/min KMh. 
+  //#define DISPLAYAVGEFFICIENCY                // Display average mAh used / per KM instead of mAh/min KMh.
   //#define iNAV                    // Uncomment this if you are using latest iNAV version from repository (1.01 at time of this MWOSD release)
   //#define FIXEDWING               // Uncomment this if you are using fixed wing with MultiWii or Baseflight
-  //#define EEPROM_CLEAR            // Uncomment to force a wipe and reload of default settings at each OSD start. Same as EEPROM_CLEAR sketch.  
+  //#define EEPROM_CLEAR            // Uncomment to force a wipe and reload of default settings at each OSD start. Same as EEPROM_CLEAR sketch.
   //#define INTRO_DELAY 1           // To speed up startup
   //#define DISPLAY_DEV 0xC000        // Use screen layout dev position - display all items...
-  //#define KKAUDIOVARIO A3         // Enable this for audio vario on Arduino pin XX. A3=RSSI. Use AUDIOPIN on AEROMAX 
+  //#define KKAUDIOVARIO A3         // Enable this for audio vario on Arduino pin XX. A3=RSSI. Use AUDIOPIN on AEROMAX
   //#define MAVSENSOR173
-  //#define MSPV2  
+  //#define MSPV2
   //#define USE_AIRSPEED_SENSOR
   //#define MAV_ALT_THROTTLE          // Use alternative MAV throttle value. Not raw RC channel.
-  //#define TX_CHANNELS 16 
+  //#define TX_CHANNELS 16
   //#define PPM_CONTROL               // Enables full OSD menu, screen switching, RSSI, Throttle feature, virtual current sensor, etc using a PPM signal into OSD PWM input pin (RSSI pin on basic MINIM hardware). Requires TX type to be set below.
 
 #endif
@@ -164,14 +165,14 @@
 
 #ifdef LTM2ADSB
   #define BUDDYFLIGHT
-  #define PROTOCOL_LTM 
-  #define PROTOCOL_MAVLINK_SHARED_ADSB  
+  #define PROTOCOL_LTM
+  #define PROTOCOL_MAVLINK_SHARED_ADSB
 #endif // LTM2ADSB
 
 #ifdef UBLOX2ADSB
   #define BUDDYFLIGHT
-  #define GPSOSD_UBLOX 
-  #define PROTOCOL_MAVLINK_SHARED_ADSB  
+  #define GPSOSD_UBLOX
+  #define PROTOCOL_MAVLINK_SHARED_ADSB
 #endif // LTM2ADSB
 
 #ifdef BUDDYFLIGHT
@@ -182,15 +183,15 @@
   #define CANVAS_SUPPORT
   #ifdef USE_VSYNC
     #undef USE_VSYNC
-  #endif  
+  #endif
 #endif // CANVASOSD
 
 #ifdef ESCOSD
-  #define PROTOCOL_ESC 
+  #define PROTOCOL_ESC
   #undef  ICON_TMP
   #undef  ICON_MAIN_BATT
-  #undef  INTRO_MENU        
-  #undef  INTRO_CALLSIGN  
+  #undef  INTRO_MENU
+  #undef  INTRO_CALLSIGN
   #undef  INTRO_SIGNALTYPE
   #undef  INTRO_DELAY
   #define INTRO_DELAY 1
@@ -198,31 +199,31 @@
 
 #ifdef ADSBDEBUG
   //#define MAV_ALL                   // To act on data from all MAV SYSID in stream. NOT recommended. Specify ID in GUI. Default=1 upon reset.
-  //#define MAV_COMP_ALL  
+  //#define MAV_COMP_ALL
 #endif // ADSBDEBUG
-  
+
 #ifdef iNAV_KK // iNAV with KK VARIO
   #define iNAV
-  #define KKAUDIOVARIO AUDIOPIN     // Enable this for audio vario. AUDIOPIN = D2 on AEROMAX hardware. Alternatively use A3 (RSSI) with other hardware  
+  #define KKAUDIOVARIO AUDIOPIN     // Enable this for audio vario. AUDIOPIN = D2 on AEROMAX hardware. Alternatively use A3 (RSSI) with other hardware
   #undef MAPMODE
   #undef MENU_DEBUG
 //  #undef DISPLAY_PR
   #undef SHOW_TEMPERATURE
-  #undef INTRO_MENU                  // Enable to display TX stick MENU 
+  #undef INTRO_MENU                  // Enable to display TX stick MENU
   #undef INTRO_CALLSIGN              // Enable to display callsign at startup
   #undef INTRO_SIGNALTYPE            // Enable to display video type at startup
   #undef INTRO_FC                    // Enable to display FC version at startup
-  #undef MENU_DEBUG                  // Enable to display debug values in OSD menu 
+  #undef MENU_DEBUG                  // Enable to display debug values in OSD menu
 
 #endif
 
 #ifdef SUBMERSIBLE // MSP FC with depth sensor
 //  #define iNAV
   #define FORCESENSORS
-  #define USEMS5837                    // Enable this for BAR30  
+  #define USEMS5837                    // Enable this for BAR30
   #undef MAPMODE
   #undef MENU_DEBUG
-  #undef INTRO_MENU                  // Enable to display TX stick MENU 
+  #undef INTRO_MENU                  // Enable to display TX stick MENU
   //#undef INTRO_CALLSIGN              // Enable to display callsign at startup
   //#undef INTRO_SIGNALTYPE            // Enable to display video type at startup
   #undef INTRO_FC                    // Enable to display FC version at startup
@@ -230,33 +231,33 @@
   #undef DISPLAYEFFICIENCY           // Disable to save memeory if not used. Enable this to display Watts/KMh or Mph for efficiency
   #undef DISPLAYMAHMIN               // Disable to save memeory if not used. Enable this to display average mAh/minKMh
   #undef PILOTICON                   // Enable code to display pilot ICON as an alternative to CHARACTER display. Requires GUI > 1.8.0
-  #undef MASKGPSLOCATION             // Disable to save memeory if not used. Enables MASK GPS settings on GUI. Coordinates displayed with major digits XXX set to random location "XXX.DDDDDDD" 
-  #undef FILTER_AVG                  // Enable standard averaging filter  
+  #undef MASKGPSLOCATION             // Disable to save memeory if not used. Enables MASK GPS settings on GUI. Coordinates displayed with major digits XXX set to random location "XXX.DDDDDDD"
+  #undef FILTER_AVG                  // Enable standard averaging filter
   //#undef HORIZON                     // Enable/disable HORIZON indicator
   //#undef DISPLAY_PR
   //#undef SHOW_TEMPERATURE
-  #undef GPSTIME                     // Enable to use GPS time display functions with FC that support features 
+  #undef GPSTIME                     // Enable to use GPS time display functions with FC that support features
 #endif
 
 
-#ifdef ADSBSTATION // 
+#ifdef ADSBSTATION //
   #undef  ALARM_MSP
   #undef  ALARM_SATS
   #undef  ALARM_GPS
   #undef  OSD_SWITCH_RC
   #undef AHIINVERTSUPPORT            // Support for inverted flight. AHI flow terrain when inverted
   #undef DISPLAY_PR                  // Display pitch / roll angles. Requires relevant layout ppositions to be enabled
-  #undef AHILEVEL                    // Enable to display AHI level indicators on sidebars 
-  #undef APINDICATOR                 // Enable to display AUTOPILOT instead of RTH distance 
+  #undef AHILEVEL                    // Enable to display AHI level indicators on sidebars
+  #undef APINDICATOR                 // Enable to display AUTOPILOT instead of RTH distance
   #undef GUISENSORS                  // Enable if wish to view raw sensor data on GUI
-  #undef AIRMODE                     // Enable this to display airmode icon. 
-  #undef MASKGPSLOCATION  
+  #undef AIRMODE                     // Enable this to display airmode icon.
+  #undef MASKGPSLOCATION
   #undef ALARM_ARMED                 // Text alert of armed/disarmed status.
   #undef MAV_STATUS
-  #undef USEGLIDESCOPE 
+  #undef USEGLIDESCOPE
   #undef MAPMODE
   #undef MENU_DEBUG
-  #undef INTRO_MENU                  // Enable to display TX stick MENU 
+  #undef INTRO_MENU                  // Enable to display TX stick MENU
   #undef INTRO_CALLSIGN              // Enable to display callsign at startup
   #undef INTRO_SIGNALTYPE            // Enable to display video type at startup
   #undef INTRO_FC                    // Enable to display FC version at startup
@@ -264,23 +265,23 @@
   #undef DISPLAYEFFICIENCY           // Disable to save memeory if not used. Enable this to display Watts/KMh or Mph for efficiency
   #undef DISPLAYMAHMIN               // Disable to save memeory if not used. Enable this to display average mAh/minKMh
   #undef PILOTICON                   // Enable code to display pilot ICON as an alternative to CHARACTER display. Requires GUI > 1.8.0
-  #undef MASKGPSLOCATION             // Disable to save memeory if not used. Enables MASK GPS settings on GUI. Coordinates displayed with major digits XXX set to random location "XXX.DDDDDDD" 
-  #undef FILTER_AVG                  // Enable standard averaging filter  
+  #undef MASKGPSLOCATION             // Disable to save memeory if not used. Enables MASK GPS settings on GUI. Coordinates displayed with major digits XXX set to random location "XXX.DDDDDDD"
+  #undef FILTER_AVG                  // Enable standard averaging filter
   #undef HORIZON                     // Enable/disable HORIZON indicator
   #undef DISPLAY_PR
   #undef SHOW_TEMPERATURE
-  #undef GPSTIME                     // Enable to use GPS time display functions with FC that support features 
+  #undef GPSTIME                     // Enable to use GPS time display functions with FC that support features
   //#undef PROTOCOL_MSP
   #undef FILTER_AVG
-  #define MAV_ADSB  
-  #define ADSBSTATIONCOUNT 7          // Max number of vehicles displayed  
-  #undef ADSBAWARE  
+  #define MAV_ADSB
+  #define ADSBSTATIONCOUNT 7          // Max number of vehicles displayed
+  #undef ADSBAWARE
 #endif
 
 #ifdef BASEFLIGHT     //set up latest at time of release
   #define BASEFLIGHT20150627
 #endif
-  
+
 #ifdef RACEFLIGHT     //set up latest at time of release
 #endif
 
@@ -309,7 +310,7 @@
 #ifdef APM       //set up latest at time of release
   #ifdef QUADPLANE
     #define FIXEDWING
-  #endif  
+  #endif
   #define WIND_SUPPORTED
   #define ADSBAWARE                   // Enables ADSB display for FC's that support ADSB via Mavlink.
 #endif
@@ -415,12 +416,12 @@
   #define CORRECTLOOPTIME
   #define CANVAS_SUPPORT
   #define MSP_DOP_SUPPORT
-  #define MAV_COMP_ALL 
+  #define MAV_COMP_ALL
   #ifdef GPSTIME
     #define MSP_RTC_SUPPORT
   #endif
-  #define TX_CHANNELS 16 
-  
+  #define TX_CHANNELS 16
+
   #define MENU_STAT
   #define MENU_PID
   #define MENU_RC
@@ -432,8 +433,8 @@
     #define MENU_CURRENT
     #define MENU_DISPLAY
     #define MENU_ADVANCED
-    #define MENU_ALARMS  
-  #endif  
+    #define MENU_ALARMS
+  #endif
 #endif
 
 #if defined CLEANFLIGHT180
@@ -569,7 +570,7 @@
   #ifdef GPSTIME
     #define MSP_RTC_SUPPORT
   #endif
-  
+
   #define MENU_STAT
   #define MENU_PID
   #define MENU_RC
@@ -580,7 +581,7 @@
   #define MENU_ADVANCED
   #define MENU_GPS_TIME
   #define MENU_ALARMS
-  
+
 #endif
 
 #if defined (MULTIWII_V23)
@@ -629,8 +630,8 @@
 
 #if defined(APM)
   #undef INTRO_FC
-  #define RESETHOMEARMED  
-  #define TX_GUI_CONTROL 
+  #define RESETHOMEARMED
+  #define TX_GUI_CONTROL
   #define MAV_RTC
   #define MENU_STAT
   #define MENU_VOLTAGE
@@ -643,7 +644,7 @@
   #define AMPERAGE_DIV 10
   #ifdef ADSBAWARE
     #define MAV_ADSB
-  #endif //ADSBAWARE  
+  #endif //ADSBAWARE
 #endif
 
 #if defined(KISS)
@@ -659,7 +660,7 @@
   #define PROTOCOL_KISS
   #define AMPERAGE_DIV 10
   #undef MAPMODE
-  #define FC_MESSAGE  
+  #define FC_MESSAGE
   #define DISPLAY_VTX_CH            // Enables displays VTX channel.
   #define DISPLAY_VTX_PWR_MAX       // Enables displays VTX Power max.
 #endif
@@ -702,7 +703,7 @@
 #if defined SENTINELAAT_NMEA
   #define GPSOSD_NMEA
   #define SENTINELAAT
-  #define INTRO_DELAY 0 
+  #define INTRO_DELAY 0
   #undef INTRO_FC
   #undef  INTRO_MENU
   #undef  ALARM_MSP
@@ -710,12 +711,12 @@
   #undef  ALARM_GPS
   #undef  OSD_SWITCH_RC
   #undef  ALARM_ARMED
-  #define MENU_STAT 
+  #define MENU_STAT
 #endif
 
 #if defined GPSOSD_UBLOX_KK
   #define UBLOX
-  #define KKAUDIOVARIO AUDIOPIN     // Enable this for audio vario. AUDIOPIN = D2 on AEROMAX hardware. Alternatively use A3 (RSSI) with other hardware  
+  #define KKAUDIOVARIO AUDIOPIN     // Enable this for audio vario. AUDIOPIN = D2 on AEROMAX hardware. Alternatively use A3 (RSSI) with other hardware
 #endif
 #if defined GPSOSD_UBLOX
   #define UBLOX
@@ -779,7 +780,7 @@
   #undef  DISPLAY_PR
   #define NOAHI
   #define NOSUMMARYTHROTTLERESET
-  #define TX_GUI_CONTROL  
+  #define TX_GUI_CONTROL
   #ifndef ALARM_GPS
     #define ALARM_GPS 5
   #endif
@@ -809,7 +810,7 @@
 #undef MENU_STAT
 #undef HORIZON
 #undef MAPMODE
-#undef GPSTIME 
+#undef GPSTIME
 #undef FILTER_STD
 #undef USEGLIDESCOPE
 #undef INTRO_MENU
@@ -821,7 +822,7 @@
 #undef LONG_RANGE_DISPLAY
 #undef AIRMODE
 #undef MASKGPSLOCATION
-#undef TX_GUI_CONTROL  
+#undef TX_GUI_CONTROL
 #undef MANUALY_PAINT_STACK
 #define HIDESUMMARY
 #define INTRO_DELAY 0
@@ -852,7 +853,7 @@
   #undef MENU_STAT
   #define MENU_STAT MENU_STAT_tmp
   #undef MAXPAGE
-  #define MAXPAGE MENU_STAT 
+  #define MAXPAGE MENU_STAT
 #endif
 
 #ifdef MENU_KISS
@@ -860,7 +861,7 @@
   #undef  MENU_KISS
   #define MENU_KISS MENU_KISS_tmp
   #undef  MAXPAGE
-  #define MAXPAGE MENU_KISS 
+  #define MAXPAGE MENU_KISS
 #endif
 
 #ifdef MENU_PID
@@ -868,7 +869,7 @@
   #undef  MENU_PID
   #define MENU_PID MENU_PID_tmp
   #undef  MAXPAGE
-  #define MAXPAGE MENU_PID 
+  #define MAXPAGE MENU_PID
 #endif
 
 #ifdef MENU_RC
@@ -876,7 +877,7 @@
   #undef  MENU_RC
   #define MENU_RC MENU_RC_tmp
   #undef  MAXPAGE
-  #define MAXPAGE MENU_RC 
+  #define MAXPAGE MENU_RC
 #endif
 
 #ifdef MENU_2RC
@@ -884,7 +885,7 @@
   #undef  MENU_2RC
   #define MENU_2RC MENU_2RC_tmp
   #undef  MAXPAGE
-  #define MAXPAGE MENU_2RC 
+  #define MAXPAGE MENU_2RC
 #endif
 
 #ifdef MENU_SERVO
@@ -892,7 +893,7 @@
   #undef  MENU_SERVO
   #define MENU_SERVO MENU_SERVO_tmp
   #undef  MAXPAGE
-  #define MAXPAGE MENU_SERVO 
+  #define MAXPAGE MENU_SERVO
 #endif
 
 #ifdef MENU_FIXEDWING
@@ -900,7 +901,7 @@
   #undef  MENU_FIXEDWING
   #define MENU_FIXEDWING MENU_FIXEDWING_tmp
   #undef  MAXPAGE
-  #define MAXPAGE MENU_FIXEDWING 
+  #define MAXPAGE MENU_FIXEDWING
 #endif
 
 #ifdef MENU_INFO
@@ -908,7 +909,7 @@
   #undef  MENU_INFO
   #define MENU_INFO MENU_INFO_tmp
   #undef  MAXPAGE
-  #define MAXPAGE MENU_INFO 
+  #define MAXPAGE MENU_INFO
 #endif
 
 #ifdef MENU_VOLTAGE
@@ -916,7 +917,7 @@
   #undef  MENU_VOLTAGE
   #define MENU_VOLTAGE MENU_VOLTAGE_tmp
   #undef  MAXPAGE
-  #define MAXPAGE MENU_VOLTAGE 
+  #define MAXPAGE MENU_VOLTAGE
 #endif
 
 #ifdef MENU_RSSI
@@ -924,7 +925,7 @@
   #undef  MENU_RSSI
   #define MENU_RSSI MENU_RSSI_tmp
   #undef  MAXPAGE
-  #define MAXPAGE MENU_RSSI 
+  #define MAXPAGE MENU_RSSI
 #endif
 
 #ifdef MENU_CURRENT
@@ -932,7 +933,7 @@
   #undef  MENU_CURRENT
   #define MENU_CURRENT MENU_CURRENT_tmp
   #undef  MAXPAGE
-  #define MAXPAGE MENU_CURRENT 
+  #define MAXPAGE MENU_CURRENT
 #endif
 
 #ifdef MENU_DISPLAY
@@ -940,7 +941,7 @@
   #undef  MENU_DISPLAY
   #define MENU_DISPLAY MENU_DISPLAY_tmp
   #undef  MAXPAGE
-  #define MAXPAGE MENU_DISPLAY 
+  #define MAXPAGE MENU_DISPLAY
 #endif
 
 #ifdef MENU_ADVANCED
@@ -948,7 +949,7 @@
   #undef  MENU_ADVANCED
   #define MENU_ADVANCED MENU_ADVANCED_tmp
   #undef  MAXPAGE
-  #define MAXPAGE MENU_ADVANCED 
+  #define MAXPAGE MENU_ADVANCED
 #endif
 
 #ifdef MENU_GPS_TIME
@@ -956,7 +957,7 @@
   #undef  MENU_GPS_TIME
   #define MENU_GPS_TIME MENU_GPS_TIME_tmp
   #undef  MAXPAGE
-  #define MAXPAGE MENU_GPS_TIME 
+  #define MAXPAGE MENU_GPS_TIME
 #endif
 
 #ifdef MENU_ALARMS
@@ -964,7 +965,7 @@
   #undef  MENU_ALARMS
   #define MENU_ALARMS MENU_ALARMS_tmp
   #undef  MAXPAGE
-  #define MAXPAGE MENU_ALARMS 
+  #define MAXPAGE MENU_ALARMS
 #endif
 
 #ifdef MENU_PROFILE
@@ -972,7 +973,7 @@
   #undef  MENU_PROFILE
   #define MENU_PROFILE MENU_PROFILE_tmp
   #undef  MAXPAGE
-  #define MAXPAGE MENU_PROFILE 
+  #define MAXPAGE MENU_PROFILE
 #endif
 
 #ifdef MENU_DEBUG
@@ -980,14 +981,14 @@
   #undef  MENU_DEBUG
   #define MENU_DEBUG MENU_DEBUG_tmp
   #undef  MAXPAGE
-  #define MAXPAGE MENU_DEBUG 
+  #define MAXPAGE MENU_DEBUG
 #endif
 
 #ifdef USE_MENU_VTX
   const uint8_t MENU_VTX_tmp = MAXPAGE+1;
   #define MENU_VTX MENU_VTX_tmp
   #undef  MAXPAGE
-  #define MAXPAGE MENU_VTX 
+  #define MAXPAGE MENU_VTX
 #endif
 
 /*
@@ -1001,7 +1002,7 @@ enum {
   #define MAX_ALARM_LEN 30
 #endif
 
-#ifndef AMPERAGE_DIV 
+#ifndef AMPERAGE_DIV
   #define AMPERAGE_DIV 100
 #endif
 
@@ -1015,34 +1016,34 @@ enum {
   #undef MSP_RTC_SUPPORT
   #undef MAPMODE
 #endif
-                    
+
 
 /********************  FIXEDWING definitions  *********************/
-#ifdef FIXEDWING                     
+#ifdef FIXEDWING
   //#define LONG_RANGE_DISPLAY
   //#define USEGPSHEADING  // defined in config.h now
   //#define USEGPSALTITUDE // defined in config.h now
   #define FORCESENSORS
-  #ifndef USEGLIDESCOPE 
+  #ifndef USEGLIDESCOPE
     #define USEGLIDESCOPE
   #endif
-  #ifndef VARIOSCALE 
-    #define VARIOSCALE 250 
+  #ifndef VARIOSCALE
+    #define VARIOSCALE 250
   #endif
 #endif
 
 /********************  ROTORCRAFT definitions  *********************/
-#ifndef FIXEDWING  
-  #ifndef ROTORCRAFT  
-    #define ROTORCRAFT 
-  #endif  
+#ifndef FIXEDWING
+  #ifndef ROTORCRAFT
+    #define ROTORCRAFT
+  #endif
 
-  #if defined SKYTRACK || defined NOCONTROLLER 
+  #if defined SKYTRACK || defined NOCONTROLLER
     #undef ROTORCRAFT
-  #endif 
-#endif                   
+  #endif
+#endif
 
-#ifdef ROTORCRAFT                       
+#ifdef ROTORCRAFT
   #ifndef GPSOSDHOMEDISTANCE
     #define GPSOSDHOMEDISTANCE 15     // distance from home in meters to start check  for when when GPSOSD is home.
   #endif
@@ -1079,11 +1080,11 @@ enum {
 #define VOLTAGEPIN    A0
 #define VIDVOLTAGEPIN A2
 #define AMPERAGEPIN   A1
-#define RSSIPIN       A3              
+#define RSSIPIN       A3
 #define LEDPIN        7
-#define RCPIN         5   // Aeromax hardware only      
-#define AUXPIN        A1  // A6 for Aeromax hardware only        
-#define AUDIOPIN      2   // Aeromax hardware only  
+#define RCPIN         5   // Aeromax hardware only
+#define AUXPIN        A1  // A6 for Aeromax hardware only
+#define AUDIOPIN      2   // Aeromax hardware only
 #define INTC3             // Arduino A3 enabled for PWM/PPM interrupts) Arduino A3 == Atmega Port C bit 3 for PWM trigger on RSSI pin
 //#define INTD5           // Atmega Port D bit 5 PWM/PPM interrupts) Aeromax hardware used for RC input
 #define SBUSPIN       A3
@@ -1092,9 +1093,9 @@ enum {
 // board specific amendments:
 #ifdef AEROMAX
     #define ATMEGASETHARDWAREPORTS DDRC &= B11110111;DDRD &= B11011111;
-    #define INTD5    
+    #define INTD5
     #undef  AUXPIN
-    #define AUXPIN    A6  // A6 for Aeromax hardware only        
+    #define AUXPIN    A6  // A6 for Aeromax hardware only
     #undef SBUSPIN
     #define SBUSPIN 5
     #define SBUS_ISR2
@@ -1107,13 +1108,13 @@ enum {
     #define MAX_SOFTRESET
 #elif defined ANDROMEDA
     #define MAX_SOFTRESET
-#elif defined RTFQV1                     
+#elif defined RTFQV1
     #undef VOLTAGEPIN
     #undef VIDVOLTAGEPIN
     #define VOLTAGEPIN    A2
     #define VIDVOLTAGEPIN A0
     #define ALTERNATEDIVIDERS
-#elif defined RTFQMICRO                     
+#elif defined RTFQMICRO
     #undef VOLTAGEPIN
     #undef VIDVOLTAGEPIN
     #define VOLTAGEPIN    A2
@@ -1126,7 +1127,7 @@ enum {
     #define VOLTAGEPIN    A6
 #endif
 
-#ifdef SWAPVOLTAGEPINS                     
+#ifdef SWAPVOLTAGEPINS
     #undef VOLTAGEPIN
     #undef VIDVOLTAGEPIN
     #define VOLTAGEPIN    A2
@@ -1135,23 +1136,23 @@ enum {
 
 #ifndef ATMEGASETHARDWAREPORTS
     # define ATMEGASETHARDWAREPORTS pinMode(RSSIPIN, INPUT);pinMode(RCPIN, INPUT);
-#endif 
+#endif
 
-#ifdef RUSHDUINO                    
+#ifdef RUSHDUINO
     # define DATAOUT          11 // MOSI
     # define DATAIN           12 // MISO
     # define SPICLOCK         13 // sck
     # define VSYNC             2 // INT0
     # define MAX7456RESET      9 // RESET
-    # define MAX7456SELECT    10 // CHIP SELECT 
+    # define MAX7456SELECT    10 // CHIP SELECT
     # define MAX7456SETHARDWAREPORTS  pinMode(MAX7456RESET,OUTPUT);pinMode(MAX7456SELECT,OUTPUT);pinMode(DATAOUT, OUTPUT);pinMode(DATAIN, INPUT);pinMode(SPICLOCK,OUTPUT);pinMode(VSYNC, INPUT);
     # define MAX7456HWRESET   digitalWrite(MAX7456RESET,LOW);delay(60);digitalWrite(MAX7456RESET,HIGH);delay(40);
-    # define MAX7456ENABLE    digitalWrite(MAX7456SELECT,LOW); 
-    # define MAX7456DISABLE   digitalWrite(MAX7456SELECT,HIGH); 
+    # define MAX7456ENABLE    digitalWrite(MAX7456SELECT,LOW);
+    # define MAX7456DISABLE   digitalWrite(MAX7456SELECT,HIGH);
     # define LEDINIT          pinMode(LEDPIN,OUTPUT);
     # define LEDON            digitalWrite(LEDPIN,HIGH);
-    # define LEDOFF           digitalWrite(LEDPIN,LOW); 
-#elif defined ARDUINO_OSD // Example for Arduino guys                     
+    # define LEDOFF           digitalWrite(LEDPIN,LOW);
+#elif defined ARDUINO_OSD // Example for Arduino guys
     # define DATAOUT          11 // MOSI
     # define DATAIN           12 // MISO
     # define SPICLOCK         13 // sck
@@ -1160,12 +1161,12 @@ enum {
     # define MAX7456RESET     10 // RESET
     # define MAX7456SETHARDWAREPORTS  pinMode(MAX7456RESET,OUTPUT);pinMode(MAX7456SELECT,OUTPUT);pinMode(DATAOUT, OUTPUT);pinMode(DATAIN, INPUT);pinMode(SPICLOCK,OUTPUT);pinMode(VSYNC, INPUT);
     # define MAX7456HWRESET   digitalWrite(MAX7456RESET,LOW);delay(60);digitalWrite(MAX7456RESET,HIGH);delay(40);
-    # define MAX7456ENABLE    digitalWrite(MAX7456SELECT,LOW); 
-    # define MAX7456DISABLE   digitalWrite(MAX7456SELECT,HIGH); 
+    # define MAX7456ENABLE    digitalWrite(MAX7456SELECT,LOW);
+    # define MAX7456DISABLE   digitalWrite(MAX7456SELECT,HIGH);
     # define LEDINIT          pinMode(LEDPIN,OUTPUT);
     # define LEDON            digitalWrite(LEDPIN,HIGH);
     # define LEDOFF           digitalWrite(LEDPIN,LOW);
-#elif defined STEELEPDB //                      
+#elif defined STEELEPDB //
     # define DATAOUT          11 // MOSI
     # define DATAIN           12 // MISO
     # define SPICLOCK         13 // sck
@@ -1174,14 +1175,14 @@ enum {
     # define MAX7456RESET      9 // RESET
     # define MAX7456SETHARDWAREPORTS  pinMode(MAX7456RESET,OUTPUT);pinMode(MAX7456SELECT,OUTPUT);pinMode(DATAOUT, OUTPUT);pinMode(DATAIN, INPUT);pinMode(SPICLOCK,OUTPUT);pinMode(VSYNC, INPUT);
     # define MAX7456HWRESET   digitalWrite(MAX7456RESET,LOW);delay(60);digitalWrite(MAX7456RESET,HIGH);delay(40);
-    # define MAX7456ENABLE    digitalWrite(MAX7456SELECT,LOW); 
-    # define MAX7456DISABLE   digitalWrite(MAX7456SELECT,HIGH); 
+    # define MAX7456ENABLE    digitalWrite(MAX7456SELECT,LOW);
+    # define MAX7456DISABLE   digitalWrite(MAX7456SELECT,HIGH);
     # define LEDINIT          pinMode(LEDPIN,OUTPUT);
     # define LEDON            digitalWrite(LEDPIN,HIGH);
     # define LEDOFF           digitalWrite(LEDPIN,LOW);
-#else                                  
-    # define MAX7456ENABLE    PORTD &= ~_BV(PD6); 
-    # define MAX7456DISABLE   PORTD |= _BV(PD6); 
+#else
+    # define MAX7456ENABLE    PORTD &= ~_BV(PD6);
+    # define MAX7456DISABLE   PORTD |= _BV(PD6);
     # define MAX7456SETHARDWAREPORTS  DDRB|=B00101100;DDRB&=B11101111;DDRD|=B01000000;DDRD&=B11111011;
     # define MAX7456HWRESET   PORTB&=B11111011;delay(100);PORTB|=B00000100;
     # define LEDINIT          DDRD = DDRD|B10000000;
@@ -1194,8 +1195,12 @@ enum {
   #undef FIXEDLOOP
 #endif
 
-#if defined USEMS5837 
+#if defined USEMS5837
   #define I2C_SUPPORT
+#endif
+
+#if defined USEQMC5883L
+ #define I2C_SUPPORT
 #endif
 
 #ifdef AEROMAX
@@ -1249,11 +1254,11 @@ enum {
 #if defined ALARM_SATS
   #undef ALARM_SATS
 #endif
-#endif  
+#endif
 
 #if defined GPSSUBMARINE
-#endif  
-  
+#endif
+
 /********************  PROTOCOL rule definitions  *********************/
 #define PROTOCOL_MSP // on by default
 
@@ -1272,7 +1277,7 @@ enum {
 #define FORCESENSORS
 //#define NOSUMMARYTHROTTLERESET
 #ifndef TX_CHANNELS
-  #define TX_CHANNELS 16 
+  #define TX_CHANNELS 16
 #endif
 #define FC_MESSAGE
 #endif
@@ -1294,7 +1299,7 @@ enum {
 #ifndef PROTOCOL_MAVLINK
  #ifdef MAV_STATUS
    #undef MAV_STATUS
- #endif  
+ #endif
 #endif
 
 /********************  MSP speed enhancements rule definitions  *********************/
@@ -1312,7 +1317,7 @@ enum {
 
 
 #ifndef TX_CHANNELS
-  #define TX_CHANNELS 8 
+  #define TX_CHANNELS 8
 #endif
 
 /********************  other paramters  *********************/
@@ -1349,8 +1354,8 @@ enum {
   #define ALWAYSARMED  // starts OSD in armed mode
 #endif
 
-#ifndef BAUDRATE 
-  #ifdef PROTOCOL_MAVLINK 
+#ifndef BAUDRATE
+  #ifdef PROTOCOL_MAVLINK
     #define BAUDRATE 57600
   #else
     #define BAUDRATE 115200
@@ -1377,7 +1382,7 @@ enum {
 #ifdef MULTIWII
   #ifdef INFO_CONTROLLER
    #undef INFO_CONTROLLER
-  #endif  
+  #endif
   #undef  INTRO_MENU
   #define INFO_CONTROLLER 1
 #endif
@@ -1390,13 +1395,13 @@ enum {
 #ifdef LIBREPILOT
   #ifdef INFO_CONTROLLER
    #undef INFO_CONTROLLER
-  #endif  
+  #endif
   #define INFO_CONTROLLER 3
 #endif
 #ifdef DRONIN
   #ifdef INFO_CONTROLLER
    #undef INFO_CONTROLLER
-  #endif  
+  #endif
   #define INFO_CONTROLLER 5
 #endif
 #ifdef CLEANFLIGHT
@@ -1420,19 +1425,19 @@ enum {
 #ifdef iNAV
   #define INFO_CONTROLLER 12
 #endif
-#ifdef KISS 
+#ifdef KISS
   #define INFO_CONTROLLER 13
 #endif
 #ifdef APM
   #ifdef INFO_CONTROLLER
    #undef INFO_CONTROLLER
-  #endif  
+  #endif
   #define INFO_CONTROLLER 14
 #endif
 #ifdef PX4
   #ifdef INFO_CONTROLLER
    #undef INFO_CONTROLLER
-  #endif  
+  #endif
   #define INFO_CONTROLLER 15
 #endif
 #ifdef SKYTRACK
@@ -1441,19 +1446,19 @@ enum {
 #ifdef GPSOSD_UBLOX
   #ifdef INFO_CONTROLLER
    #undef INFO_CONTROLLER
-  #endif  
+  #endif
   #define INFO_CONTROLLER 17
 #endif
 #ifdef GPSOSD_NMEA
   #ifdef INFO_CONTROLLER
    #undef INFO_CONTROLLER
-  #endif  
+  #endif
   #define INFO_CONTROLLER 18
 #endif
 #ifdef GPSOSD_NMEA
   #ifdef INFO_CONTROLLER
    #undef INFO_CONTROLLER
-  #endif  
+  #endif
   #define INFO_CONTROLLER 19
 #endif
 #ifdef NOCONTROLLER
@@ -1537,7 +1542,7 @@ enum {
   #define INFO_OPTIONS_4 0
 #endif
 
-#if defined TX_GUI_CONTROL   //PITCH,YAW,THROTTLE,ROLL order controlled by GUI 
+#if defined TX_GUI_CONTROL   //PITCH,YAW,THROTTLE,ROLL order controlled by GUI
   #define INFO_OPTIONS_5 1<<5
 #else
   #define INFO_OPTIONS_5 0
@@ -1548,25 +1553,25 @@ enum {
 
 /********************  info for GUI  *********************/
 #ifndef INFO_CONTROLLER
-  #define INFO_CONTROLLER          0            // default - unknown 
+  #define INFO_CONTROLLER          0            // default - unknown
 #endif
 
 #ifndef INFO_VERSION
-  #define INFO_VERSION             MWOSDVERSION // version specified 
+  #define INFO_VERSION             MWOSDVERSION // version specified
 #endif
 
 #ifndef INFO_VENDOR
-  #define INFO_VENDOR              VENDOR       // vendor specific reference 
+  #define INFO_VENDOR              VENDOR       // vendor specific reference
 #endif
 
 #ifndef INFO_HARDWARE
-  #define INFO_HARDWARE            0            // default - unknown 
+  #define INFO_HARDWARE            0            // default - unknown
 #endif
 
 #ifndef INFO_AIRCRAFT
-  #define INFO_AIRCRAFT            0            // default - unknown 
+  #define INFO_AIRCRAFT            0            // default - unknown
 #endif
 
 #ifndef INFO_OPTIONS
-  #define INFO_OPTIONS            0            // default - unknown 
+  #define INFO_OPTIONS            0            // default - unknown
 #endif

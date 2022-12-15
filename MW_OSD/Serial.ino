@@ -9,15 +9,15 @@ static uint8_t txChecksum;
 
 #if defined PROTOCOL_LTM
   #include "LTM.h"
-#endif 
+#endif
 
 #if defined PROTOCOL_KISS
   #include "KISS.h"
-#endif 
+#endif
 
 #if defined PROTOCOL_SKYTRACK
   // #include "SKYTRACK.h"
-#endif 
+#endif
 
 uint32_t read32() {
   uint32_t t = read16();
@@ -110,7 +110,7 @@ void mspV2Write16(uint16_t t){
 void crc8_dvb_s2_tx(uint8_t crc, unsigned char a, uint8_t crcversion)
 {
   crc ^= a;
-  if (crcversion == 2){   
+  if (crcversion == 2){
     for (int ii = 0; ii < 8; ++ii){
       if (crc & 0x80){
         crc = (crc << 1) ^ 0xD5;
@@ -256,19 +256,19 @@ void serialMSPCheck()
   #endif
 
   if (cmdMSP == MSP_OSD) {
-    # ifdef USE_VSYNC // disable VSYNC for faster OSD updates   
+    # ifdef USE_VSYNC // disable VSYNC for faster OSD updates
       EIMSK = EIMSK & ~(1 << INT0);
     #endif
     uint8_t cmd = read8();
-      timer.GUI_active=254; 
+      timer.GUI_active=254;
     if (cmd == OSD_READ_CMD_EE) {
       eeaddress = read8();
       eeaddress = eeaddress+read8();
-      eedata = read8();     
-      settingsSerialRequest();   
+      eedata = read8();
+      settingsSerialRequest();
     }
 
-    if (cmd == OSD_WRITE_CMD_EE) {  
+    if (cmd == OSD_WRITE_CMD_EE) {
       for(uint8_t i=0; i<10; i++) {
         eeaddress = read8();
         eeaddress = eeaddress+(read8()<<8);
@@ -278,13 +278,13 @@ void serialMSPCheck()
           readEEPROM();
         }
       }
-      eeaddress++;         
+      eeaddress++;
       EEPROM.write(0,EEPROMVER);
       settingswriteSerialRequest();
     }
 #ifdef GUISENSORS
     if (cmd == OSD_SENSORS2||cmd == OSD_SENSORS) {
-      timer.GPS_initdelay=255; 
+      timer.GPS_initdelay=255;
       cfgWriteRequest(MSP_OSD,1+10);
       cfgWrite8(OSD_SENSORS);
       for (uint8_t sensor=0;sensor<SENSORTOTAL;sensor++) {
@@ -300,13 +300,13 @@ void serialMSPCheck()
        #ifdef cfgActive
        if(OSD_SENSORS==cfgck) {
          cfgActive
-       }  
+       }
        #endif
        cfgWriteRequest(MSP_OSD,1+12);
        cfgWrite8(OSD_INFO);
-       cfgWrite16(INFO_CONTROLLER); 
+       cfgWrite16(INFO_CONTROLLER);
        cfgWrite16(INFO_HARDWARE);
-       cfgWrite16(INFO_VERSION); 
+       cfgWrite16(INFO_VERSION);
        cfgWrite16(INFO_AIRCRAFT);
        cfgWrite16(INFO_OPTIONS);
        cfgWrite16(INFO_VENDOR);
@@ -342,7 +342,7 @@ void serialMSPCheck()
     if(cmd == OSD_RESET) {
       flags.reset=1;
     }
-                    
+
   }
 
 
@@ -423,7 +423,7 @@ For sub-command 3 (draw string):
       }
       break;
 
-    case 4:  // documentation indicates a screen draw, but it seems independant of drawn strings and unusable      
+    case 4:  // documentation indicates a screen draw, but it seems independant of drawn strings and unusable
       //displayReady = true;
       //MAX7456_DrawScreen(); // Draws and clears..
       break;
@@ -432,23 +432,23 @@ For sub-command 3 (draw string):
   }
   #endif // CANVAS_SUPPORT
 
-/*  
+/*
   if (cmdMSP==MSP_IDENT) // no longer used
   {
     flags.ident=1;
     MwVersion= read8();                             // MultiWii Firmware version
   }
-*/  
+*/
 
 /*
-if (cmdMSP==MSP_FC_VARIANT) 
+if (cmdMSP==MSP_FC_VARIANT)
   {
     FC.variant = read32();
   }
 */
 
 #ifdef INTRO_FC
-if (cmdMSP==MSP_FC_VERSION) 
+if (cmdMSP==MSP_FC_VERSION)
   {
     FC.verMajor = read8();
     FC.verMinor = read8();
@@ -464,7 +464,7 @@ if (cmdMSP==MSP_STATUS)
     MwSensorActive = read32();
     #if defined FORCESENSORS
       MwSensorPresent|=BAROMETER|MAGNETOMETER|ACCELEROMETER;
-    #endif  
+    #endif
     armed = (MwSensorActive & mode.armed) != 0;
     FCProfile = read8();
     if (!configMode){
@@ -500,9 +500,9 @@ if (cmdMSP==MSP_STATUS)
       if (!armed){
         GPS_home_altitude=GPS_altitude;
         MSP_home_set=1;
-      } 
+      }
       GPS_altitude=GPS_altitude-GPS_home_altitude;
-    #endif // RESETGPSALTITUDEATARM  
+    #endif // RESETGPSALTITUDEATARM
     #if defined I2CGPS_SPEED
       GPS_speed = read16()*10;
       //gpsfix(); untested
@@ -511,7 +511,7 @@ if (cmdMSP==MSP_STATUS)
     #endif // I2CGPS_SPEED
     #ifndef MSPV2
       AIR_speed=GPS_speed;
-    #endif  
+    #endif
     GPS_ground_course = read16();
     #if defined MSP_DOP_SUPPORT
       GPS_dop=read16();
@@ -524,9 +524,9 @@ if (cmdMSP==MSP_STATUS)
 #ifdef I2CGPS_DISTANCE
     gpsdistancefix();
 #endif
-    
+
     GPS_directionToHome=read16();
-    
+
 #if defined GPSTIME && !defined MSP_RTC_SUPPORT
     read8();
     GPS_time = read32();
@@ -541,21 +541,26 @@ if (cmdMSP==MSP_STATUS)
      read8();
      GPS_waypoint_step=read8();
   }
-#endif //MULTIWII_V24 
+#endif //MULTIWII_V24
 
   if (cmdMSP==MSP_ATTITUDE)
   {
     for(uint8_t i=0;i<2;i++){
       MwAngle[i] = read16();
     }
+    #if defined (USEQMC5883L)
+    MwHeading = QMC5883L_sensor.getAzimuth();
+    #else
       MwHeading = read16();
-    #if defined (AUTOSENSEMAG) && defined (FIXEDWING)     
+    #endif
+    #if defined (AUTOSENSEMAG) && defined (FIXEDWING) && !(defined (USEQMC5883L))
       if(!(MwSensorPresent&MAGNETOMETER))
         MwHeading = GPS_ground_course/10;
     #elif defined (FIXEDWING)
       if (Settings[S_USEGPSHEADING]>0)
         MwHeading = GPS_ground_course/10;
     #endif
+
     #ifdef HEADINGCORRECT
       if (MwHeading >= 180) MwHeading -= 360;
     #endif
@@ -579,14 +584,14 @@ if (cmdMSP==MSP_STATUS)
   {
     #ifdef USEMS5837
       MwAltitude = (float)100*MS5837sensor.depth();
-    #elif defined (AUTOSENSEBARO) && defined (FIXEDWING)     
+    #elif defined (AUTOSENSEBARO) && defined (FIXEDWING)
     if(!(MwSensorPresent&BAROMETER)){
       MwAltitude = (int32_t)GPS_altitude*100;
       gpsvario();
-    }     
+    }
     else{
       MwAltitude = read32();
-      MwVario = read16();      
+      MwVario = read16();
     }
     #elif defined (FIXEDWING)
     if (Settings[S_USEGPSHEADING]>1){
@@ -595,12 +600,12 @@ if (cmdMSP==MSP_STATUS)
     }
     else{
       MwAltitude = read32();
-      MwVario = read16();      
+      MwVario = read16();
     }
     #else
     MwAltitude =read32();
     MwVario = read16();
-    #endif  
+    #endif
   }
 
   if (cmdMSP==MSP_ANALOG)
@@ -611,14 +616,14 @@ if (cmdMSP==MSP_STATUS)
       FCRssi = read16();
     #else
       MwRssi = read16();
-    #endif      
+    #endif
     MWAmperage = (int16_t)read16();
     if(!Settings[S_MWAMPERAGE]) {
       pMeterSum=0;
     }
   }
 
-#ifdef MENU_SERVO  
+#ifdef MENU_SERVO
   if (cmdMSP==MSP_SERVO_CONF)
   {
     for (uint8_t i = 0; i < MAX_SERVOS; i++) {
@@ -631,7 +636,7 @@ if (cmdMSP==MSP_STATUS)
    }
    modeMSPRequests &=~ REQ_MSP_SERVO_CONF;
  }
-#endif //MENU_SERVO   
+#endif //MENU_SERVO
 
 #ifdef MENU_FIXEDWING
   if (cmdMSP==MSP_FW_CONFIG)
@@ -667,7 +672,7 @@ if (cmdMSP==MSP_STATUS)
     skip16(); //ignore: mincommand
 
     skip16(); //ignore: failsafe_throttle
-    
+
     skip8(); //ignore: gps_type
     skip8(); //ignore: gps_baudrate
     skip8(); //ignore: gps_ubx_sbas
@@ -683,7 +688,7 @@ if (cmdMSP==MSP_STATUS)
     MvVBatMinCellVoltage = read8(); //vbatmincellvoltage
     MvVBatMaxCellVoltage = read8(); //vbatmaxcellvoltage
     MvVBatWarningCellVoltage = read8(); //vbatwarningcellvoltage
-    
+
   }
 
   if (cmdMSP==MSP_VOLTAGE_METER_CONFIG)
@@ -698,7 +703,7 @@ if (cmdMSP==MSP_STATUS)
   }
 #endif //USE_FC_VOLTS_CONFIG
 
-#if defined (CORRECT_MSP_BF1)  
+#if defined (CORRECT_MSP_BF1)
   if (cmdMSP==MSP_CONFIG)
   {
     for(uint8_t i=0; i<25; i++) {
@@ -706,10 +711,10 @@ if (cmdMSP==MSP_STATUS)
     }
     rollRate = bfconfig[18];
     PitchRate = bfconfig[19];
-    modeMSPRequests &=~ REQ_MSP_CONFIG;    
+    modeMSPRequests &=~ REQ_MSP_CONFIG;
   }
-#endif  
-  
+#endif
+
   if (cmdMSP==MSP_RC_TUNING)
   {
     #ifdef CORRECT_MSP_CF2
@@ -750,7 +755,7 @@ if (cmdMSP==MSP_STATUS)
   if (cmdMSP==MSP_PIDNAMES)
   {
       // parse buffer and fill menu_pid[]. We need to receive all bytes, but store only ones that we need
-      
+
       uint8_t pn_index = 0, avail = (PIDNAME_BUFSIZE - 1), c;
       uint8_t *out = (uint8_t *)menu_pid;
 
@@ -768,7 +773,7 @@ if (cmdMSP==MSP_STATUS)
              *out = 0;
 
               out += avail + 1;
-              
+
               avail = PIDNAME_BUFSIZE - 1;
           }
           else if(avail > 0)
@@ -782,7 +787,7 @@ if (cmdMSP==MSP_STATUS)
         {
            ++pn_index;
         }
-      
+
       }
       modeMSPRequests &= ~REQ_MSP_PIDNAMES;
   }
@@ -848,7 +853,7 @@ if (cmdMSP==MSP_STATUS)
       }
     }
     for (i = 1; i < month; i++) {
-      if ( (i == 2) && LEAP_YEAR(year)) { 
+      if ( (i == 2) && LEAP_YEAR(year)) {
         GPS_time += SECS_PER_DAY * 29;
       } else {
         GPS_time += SECS_PER_DAY * monthDays[i-1];
@@ -859,12 +864,12 @@ if (cmdMSP==MSP_STATUS)
     GPS_time+= minute * SECS_PER_MIN;
     GPS_time+= second;
     GPS_time += 946684800;
-  }  
+  }
   #else
   {
     GPS_time = read32();
   }
-  #endif //iNAV 
+  #endif //iNAV
   if(!armed){ // For now to avoid uneven looking clock
     datetime.unixtime = GPS_time;
   }
@@ -932,7 +937,7 @@ if (cmdMSP==MSP_STATUS)
       --remaining;
     }
   }
-#else  
+#else
   if(cmdMSP==MSP_BOXIDS) {
     uint32_t bit = 1;
     uint8_t remaining = dataSize;
@@ -940,9 +945,9 @@ if (cmdMSP==MSP_STATUS)
 
     while(remaining > 0) {
       char c = read8();
-      #ifdef DEBUGDPOSMSPID    
+      #ifdef DEBUGDPOSMSPID
         boxidarray[dataSize-remaining]=c;
-      #endif  
+      #endif
       switch(c) {
       case 0:
         mode.armed |= bit;
@@ -1007,12 +1012,12 @@ if (cmdMSP==MSP_STATUS)
         break;
 #endif // EXTENDEDMODESUPPORT
 
-        
+
 #if defined ACROPLUS
       case 29:
         mode.acroplus |= bit;
         break;
-#endif //ACROPLUS        
+#endif //ACROPLUS
       }
       bit <<= 1;
       --remaining;
@@ -1025,8 +1030,8 @@ if (cmdMSP==MSP_STATUS)
     float t_AIR_speed = read32();
     AIR_speed = t_AIR_speed;
   }
-#endif // MSPV2  
-  
+#endif // MSPV2
+
 #endif
 #endif // GPSOSD
 }
@@ -1083,16 +1088,16 @@ void handleRawRC() {
         vtx_flash_led(Settings[S_VTX_BAND] + 1);
 # endif
       }
-      
+
       if (vtxBand != Settings[S_VTX_BAND] || vtxChannel != Settings[S_VTX_CHANNEL])
       {
           // XXX Is this vtx_save()?
 
 //        EEPROM.write(S_VTX_BAND, Settings[S_VTX_BAND]); // write is save only in configsave??
-//        EEPROM.write(S_VTX_CHANNEL, Settings[S_VTX_CHANNEL]);  // write is save only in configsave??      
+//        EEPROM.write(S_VTX_CHANNEL, Settings[S_VTX_CHANNEL]);  // write is save only in configsave??
         vtxBand = Settings[S_VTX_BAND];
         vtxChannel = Settings[S_VTX_CHANNEL];
-        vtx_set_frequency(vtxBand, vtxChannel);        
+        vtx_set_frequency(vtxBand, vtxChannel);
         waitStick = 1;
       }
     }
@@ -1119,14 +1124,14 @@ if((MwRcData[PITCHSTICK]>MAXSTICK)&&(MwRcData[YAWSTICK]>MAXSTICK)&&(MwRcData[THR
     else if(configMode) {
       int8_t oldmenudir=constrain(menudir,-5,5);
       menudir=0;
-#ifndef NOSUMMARYTHROTTLERESET 
+#ifndef NOSUMMARYTHROTTLERESET
       if(previousarmedstatus&&((MwRcData[THROTTLESTICK]>1600)||(timer.disarmed==0)))
       {
 	// EXIT from SHOW STATISTICS AFTER DISARM (push throttle up)
 	waitStick = 2;
 	configExit();
       }
-#endif // NOSUMMARYTHROTTLERESET 
+#endif // NOSUMMARYTHROTTLERESET
 #ifdef TX_MODE1
       if(configMode&&(MwRcData[YAWSTICK]>MAXSTICK)) // MOVE RIGHT
 #else
@@ -1183,14 +1188,14 @@ if((MwRcData[PITCHSTICK]>MAXSTICK)&&(MwRcData[YAWSTICK]>MAXSTICK)&&(MwRcData[THR
       {
 	waitStick = 1;
         menudir=-1+oldmenudir;
-        serialMenuCommon();  
+        serialMenuCommon();
       }
 #ifdef TX_MODE1
       else if(!previousarmedstatus&&configMode&&(MwRcData[ROLLSTICK]>MAXSTICK)) // INCREASE
 #else
       else if(!previousarmedstatus&&configMode&&(MwRcData[YAWSTICK]>MAXSTICK)) // INCREASE
 #endif
-      { 
+      {
 	waitStick =1;
         menudir=1+oldmenudir;
         #ifdef MENU_ALARMS
@@ -1198,8 +1203,8 @@ if((MwRcData[PITCHSTICK]>MAXSTICK)&&(MwRcData[YAWSTICK]>MAXSTICK)&&(MwRcData[THR
 	  if(ROW==5) timer.magCalibrationTimer=0;
         }
         #endif //MENU_ALARMS
-        serialMenuCommon();  
-      }      
+        serialMenuCommon();
+      }
     }
     if(waitStick == 1)
       stickTime = millis();
@@ -1278,7 +1283,7 @@ void serialMenuCommon()
                 nfRollEnable = !nfRollEnable;
               }
               break;
-            case 2: 
+            case 2:
               nfRollCenter = constrain(nfRollCenter + menudir, KISS_MIN_NF_CENTER, KISS_MAX_NF_CENTER);
               break;
             case 3:
@@ -1418,14 +1423,14 @@ void serialMenuCommon()
 #endif
 
 #ifdef MENU_2RC
-  if(configPage == MENU_2RC && COL == 3) {    
+  if(configPage == MENU_2RC && COL == 3) {
     switch(ROW) {
       case 1: tpa_breakpoint16 += menudir; break;
       case 2: rcYawExpo8 += menudir; break;
     }
   }
 #endif
-  
+
 #ifdef MENU_SERVO
   if(configPage == MENU_SERVO) {
     switch(COL) {
@@ -1587,10 +1592,10 @@ void serialMenuCommon()
       if (FCProfile != PreviousFCProfile){
         setFCProfile();
         PreviousFCProfile = FCProfile;
-      }        
+      }
     #endif ENABLE_MSP_SAVE_ADVANCED
   #endif //ADVANCEDSAVE
-#endif  
+#endif
 
   if (ROW == 10) {
     previousconfigPage = configPage;
@@ -1617,7 +1622,7 @@ void serialMSPreceive(uint8_t loops)
     HEADER_CMD1_MSPV2,
     HEADER_CMD2_MSPV2,
     HEADER_SIZE1_MSPV2,
-#endif    
+#endif
   }
   c_state = IDLE;
 
@@ -1660,39 +1665,39 @@ void serialMSPreceive(uint8_t loops)
     c = focusPort->read();
 #else
     c = Serial.read();
-  #ifdef DEBUGDPOSRX    
+  #ifdef DEBUGDPOSRX
     timer.serialrxrate++;
   #endif
 #endif
 
-    #ifdef GPSOSD    
+    #ifdef GPSOSD
       armedtimer = 0;
       #if defined (NAZA)
         NAZA_NewData(c);
       #else
-        if (GPS_newFrame(c)) GPS_NewData();  
-      #endif //NAZA  
-    #endif //GPSOSD   
+        if (GPS_newFrame(c)) GPS_NewData();
+      #endif //NAZA
+    #endif //GPSOSD
 
     if (!fontMode){
       #if defined (PROTOCOL_SKYTRACK)
         serialSLreceive(c);
-      #endif //PROTOCOL_SKYTRACK   
+      #endif //PROTOCOL_SKYTRACK
       #if defined (PROTOCOL_MAVLINK)
         serialMAVreceive(c);
-      #endif //PROTOCOL_MAVLINK   
+      #endif //PROTOCOL_MAVLINK
       #if defined (PROTOCOL_LTM)
         serialLTMreceive(c);
-      #endif // PROTOCOL_LTM   
+      #endif // PROTOCOL_LTM
       #if defined (PROTOCOL_KISS)
         if (timer.GUI_active==0)
           serialKISSreceive(c);
-      #endif // PROTOCOL_KISS   
+      #endif // PROTOCOL_KISS
       #if defined (PROTOCOL_ESC)
         serialESCreceive(c);
-      #endif // PROTOCOL_ESC 
+      #endif // PROTOCOL_ESC
     }
-    
+
     if (c_state == IDLE)
     {
       c_state = (c=='$') ? HEADER_START : IDLE;
@@ -1709,7 +1714,7 @@ void serialMSPreceive(uint8_t loops)
         c_state = HEADER_MX;
         MSPversion = 2;
       }
-#endif      
+#endif
     }
     else if (c_state == HEADER_MX)
     {
@@ -1731,16 +1736,16 @@ void serialMSPreceive(uint8_t loops)
         c_state = IDLE;
       }
 
-#endif        
+#endif
       rcvChecksum = 0;
-      crc8_dvb_s2(rcvChecksum,c,MSPversion);       
+      crc8_dvb_s2(rcvChecksum,c,MSPversion);
     }
     else if (c_state == HEADER_SIZE)
     {
 #ifdef MSPV2
       cmdMSP = c;
       if (MSPversion == 2) {
-        c_state = HEADER_CMD1_MSPV2;        
+        c_state = HEADER_CMD1_MSPV2;
       }
       else{
         receiverIndex=0;
@@ -1749,11 +1754,11 @@ void serialMSPreceive(uint8_t loops)
 #else
       cmdMSP = c;
       c_state = PAYLOAD_READY;
-#endif        
+#endif
       crc8_dvb_s2(rcvChecksum,c,MSPversion);
       receiverIndex=0;
     }
-    
+
 #ifdef MSPV2
     else if (c_state == HEADER_CMD1_MSPV2)
     {
@@ -1779,7 +1784,7 @@ void serialMSPreceive(uint8_t loops)
       }
       receiverIndex=0;
     }
-#endif      
+#endif
     else if (c_state == PAYLOAD_READY) // ready for payload / cksum
     {
 #ifdef FLIGHTONE_MSP
@@ -1791,8 +1796,8 @@ void serialMSPreceive(uint8_t loops)
         }
       }
     }
-#endif // FLIGHTONE_MSP     
-      
+#endif // FLIGHTONE_MSP
+
       if(receiverIndex == dataSize) // received checksum byte
       {
         if(rcvChecksum == c) {
@@ -1818,7 +1823,7 @@ void serialMSPreceive(uint8_t loops)
 void crc8_dvb_s2(uint8_t crc, unsigned char a, uint8_t crcversion)
 {
   crc ^= a;
-  if (crcversion == 2){   
+  if (crcversion == 2){
     for (int ii = 0; ii < 8; ++ii){
       if (crc & 0x80){
         crc = (crc << 1) ^ 0xD5;
@@ -1891,7 +1896,7 @@ void configExit()
   #endif
 
   #if 0 // XXX What is this for???
-    #ifdef VTX_RTC6705   
+    #ifdef VTX_RTC6705
       vtx_read();
     #endif //VTX_RTC6705
   #endif
@@ -1911,7 +1916,7 @@ void configSave()
     #if defined CORRECTLOOPTIME
       mspWriteRequest(MSP_SET_LOOP_TIME, 2);
       mspWrite16(LoopTime);
-      mspWriteChecksum();  
+      mspWriteChecksum();
     #endif //CORRECTLOOPTIME
   #endif //ADVANCEDSAVE
 #endif //ENABLE_MSP_SAVE_ADVANCED
@@ -1924,7 +1929,7 @@ void configSave()
     mspWrite8(pidD[i]);
   }
   mspWriteChecksum();
-  
+
 #if defined CORRECT_MSP_CF2
   mspWriteRequest(MSP_SET_RC_TUNING,11);
   mspWrite8(rcRate8);
@@ -1988,10 +1993,10 @@ void configSave()
   for(uint8_t i=0; i<8; i++) {
     mspWrite16(0);
   }
-  mspWriteChecksum();  
+  mspWriteChecksum();
 #endif // MENU_FIXEDWING
 
-#ifdef MENU_SERVO  
+#ifdef MENU_SERVO
   mspWriteRequest(MSP_SET_SERVO_CONF,(9*MAX_SERVOS));
     for (uint8_t i = 0; i < MAX_SERVOS; i++) {
       for (uint8_t ii = 0; ii < 5; ii++) {
@@ -2009,7 +2014,7 @@ void configSave()
 #if 0 // This is not necessary? vtxBand,vtxChannel&vtxPower are all in sync with corresponding Settings at the end of stick handling.
   #ifdef USE_MENU_VTX
     vtx_save();
-  #endif // USE_MENU_VTX  
+  #endif // USE_MENU_VTX
 #endif
 
   writeEEPROM();
@@ -2024,7 +2029,7 @@ void fontSerialRequest() {
   cfgWrite8(OSD_GET_FONT);
   cfgWrite16(nextCharToRequest);
   cfgWriteChecksum();
-} 
+}
 
 void settingsSerialRequest() {
   cfgWriteRequest(MSP_OSD,1+30);

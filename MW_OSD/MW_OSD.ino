@@ -141,6 +141,10 @@ uint16_t UntouchedStack(void)
 #include "MS5837.h"
 MS5837 MS5837sensor;
 #endif //USEMS5837
+#if defined USEQMC5883L
+#include "QMC5883LCompass.h"
+QMC5883LCompass QMC5883L_sensor;
+#endif
 #if defined PROTOCOL_SKYTRACK
 #include "SKYTRACK.h"
 #endif
@@ -194,7 +198,7 @@ void setup()
 #ifndef SENTINELAAT
   checkEEPROM();
   readEEPROM();
-#endif  
+#endif
 
 #ifndef STARTUPDELAY
 #define STARTUPDELAY 1000
@@ -242,6 +246,12 @@ void setup()
   MS5837sensor.init();
   MS5837sensor.setFluidDensity(FLUID_DENSITY); // kg/m^3
 #endif // USE MS_5837
+#if defined USEQMC5883L
+QMC5883L_sensor.setReset();
+QMC5883L_sensor.init();
+QMC5883L_sensor.launchAutoCalibration();
+//QMC5883L_sensor.setReset();
+#endif // USE QMC5883L compass
   GPS_time=946684801; // Set to Y2K as default.
   datetime.unixtime = GPS_time;
   Serial.flush();
@@ -260,13 +270,13 @@ void loop()
     case 0:
       MAX7456_WriteString_P(messageF0, 32);
       displayReady = true;
-      MAX7456_DrawScreen();    
+      MAX7456_DrawScreen();
       delay(3000);
       displayReady = false;
       displayFont();
       MAX7456_WriteString_P(messageF1, 32);
       displayReady = true;
-      MAX7456_DrawScreen();  
+      MAX7456_DrawScreen();
       fontStatus++;
       delay(3000);
       break;
@@ -278,7 +288,7 @@ void loop()
       MAX7456_WriteString_P(messageF2, 32);
       displayFont();
       displayReady =true;
-      MAX7456_DrawScreen();  
+      MAX7456_DrawScreen();
       fontStatus++;
       delay(3000);
       break;
@@ -293,9 +303,9 @@ void loop()
   if (displayReady == false){
     displayFont();
     displayReady = true;
-    MAX7456_DrawScreen();  
+    MAX7456_DrawScreen();
   }
-  delay(1000);  
+  delay(1000);
 }
 #elif defined CANVASOSD
 void loop()
@@ -306,7 +316,7 @@ void loop()
 #elif defined ESCOSD
 void loop()
 {
- 
+
   // It would be beneficial to run this every few seconds to identify and reset max7456 lockups from low voltages
   static uint32_t lastcheck;
   if (millis() / 1000 == lastcheck){
@@ -315,26 +325,26 @@ void loop()
   }
 
   serialMSPreceive(1);
- 
+
   if(micros()-ESC_loopTime > 200){ //no serial, reset counter
     receivedBytes = 0;
   }
-      
+
   if (displayReady != true){
     displayTemperature();
     displayVoltage();
     displayAmperage();
     displaypMeterSum();
     displayWatt();
-    displayRPM(); 
-    displayReady =true;    
+//    displayRPM();
+      displayReady =true;
 
 //  Data received test
-    displayHeading();  
+displayHeading();
   }
 
    if (millis() > (vsync_timer + VSYNC_TIMEOUT))
-      MAX7456_DrawScreen();       
+      MAX7456_DrawScreen();
 }
 #elif defined TOSD
 void loop()
@@ -350,10 +360,10 @@ void loop()
     displayFont();
     displayDebug();
     displayReady = true;
-    true;    
-  } 
+    true;
+  }
   if (millis() > (vsync_timer + VSYNC_TIMEOUT))
-    MAX7456_DrawScreen();   
+    MAX7456_DrawScreen();
 }
 #elif defined XSENTINELAAT
 
@@ -389,7 +399,7 @@ void loop()
       tx_throttle = 4;
       break;
   }
-#endif // TX_GUI_CONTROL   //PITCH,YAW,THROTTLE,ROLL order controlled by GUI   
+#endif // TX_GUI_CONTROL   //PITCH,YAW,THROTTLE,ROLL order controlled by GUI
 
   alarms.active = 0;
   timer.loopcount++;
@@ -482,7 +492,14 @@ void loop()
     timer.Blink10hz = !timer.Blink10hz;
 #ifdef USEMS5837
     MS5837sensor.read();
-#endif //USEMS5837  
+#endif //USEMS5837
+#ifdef USEQMC5883L
+QMC5883L_sensor.read();
+if (QMC5883L_sensor.getCalibrationStatus() == QMC5883L_sensor.CALIBRATION_STATUS_LAUNCHED || QMC5883L_sensor.getCalibrationStatus() == QMC5883L_sensor.CALIBRATION_STATUS_IN_PROGRESS ){
+  QMC5883L_sensor.autoCalibrationTick();
+}
+MwHeading = QMC5883L_sensor.getAzimuth();
+#endif
     if (GPS_fix && armed) {
       if (Settings[S_UNITSYSTEM])
         tripSum += GPS_speed * GPS_CONVERSION_UNIT_TO_FT_100MSEC;
@@ -504,7 +521,7 @@ void loop()
       // Send request for message every 100ms
       kissMessageToRequest = true;
     }
-    
+
 #endif // KISS
 #ifndef GPSOSD
 #ifdef MSP_SPEED_MED
@@ -520,9 +537,9 @@ void loop()
       }
 #endif // PROTOCOL_MSP
     }
-#endif //MSP_SPEED_MED  
+#endif //MSP_SPEED_MED
 #endif //GPSOSD
-  
+
   }  // End of slow Timed Service Routine (100ms loop)
 
   if ((currentMillis - previous_millis_high) >= hi_speed_cycle) // 33 Hz or 100hz in MSP high mode.
@@ -698,11 +715,11 @@ void loop()
 #ifdef CANVAS_SUPPORT
       if (!canvasMode)
 #endif // CANVAS_SUPPORT
-      {          
+      {
         if (millis() > (vsync_timer + VSYNC_TIMEOUT)){
-          MAX7456_DrawScreen();   
+          MAX7456_DrawScreen();
         }
-      }        
+      }
    }
 
 #ifdef SBUS_CONTROL
@@ -730,17 +747,17 @@ void loop()
         ROW = 10;
         COL = 1;
         configMode = 1;
-        setMspRequests();      
+        setMspRequests();
       }
 #else
       if (previousarmedstatus && !armed) {
         previousarmedstatus = 0;
         configMode = 0;
       }
-#endif //HIDESUMMARY      
+#endif //HIDESUMMARY
       if (configMode)
       {
-        setMspRequests();   
+        setMspRequests();
         buildConfig();
       }
 #ifdef CANVAS_SUPPORT
@@ -756,7 +773,7 @@ void loop()
       else
       {
         setMspRequests();
-        buildDisplay();        
+        buildDisplay();
       }
     }
   }  // End of fast Timed Service Routine (50ms loop)
@@ -780,7 +797,7 @@ void loop()
 #if defined (GPSTIME) && !defined (UBLOX)
     datetime.unixtime++;
     updateDateTime(datetime.unixtime);
-#endif //GPSTIME    
+#endif //GPSTIME
     if (timer.armedstatus > 0)
       timer.armedstatus--;
     timer.seconds += 1000;
@@ -791,22 +808,22 @@ void loop()
 #endif
 #ifdef ADSBAWARE
     if (timer.adsbttl > 0){
-      timer.adsbttl--; 
+      timer.adsbttl--;
     }
     else{
       adsb.dist = 0;
       adsb.alt = 0;
-      adsb.cog = 0; 
-    }        
+      adsb.cog = 0;
+    }
 #endif // ADSBAWARE
 #ifdef ADSBSTATION
     for (uint8_t X = 0; X < ADSBSTATIONCOUNT; X++){
-      if (adsbvehicle[X].ttl>0) 
+      if (adsbvehicle[X].ttl>0)
         adsbvehicle[X].ttl--;
     }
-#endif // ADSBSTATION    
+#endif // ADSBSTATION
 #ifdef BUDDYFLIGHT
-    send_mavlink_ADSB_STATUS_MESSAGE(); 
+    send_mavlink_ADSB_STATUS_MESSAGE();
     send_mavlink_ADSB_TRAFFIC_REPORT_MESSAGE();
 #endif // BUDDYFLIGHT
 #ifdef DEBUGDPOSLOOP
@@ -830,7 +847,7 @@ void loop()
   timer.d2rate=0;
   debug[3] = timer.d3rate;
   timer.d3rate=0;
-#endif 
+#endif
     onTime++;
     if (1){
       MAX7456CheckStatus();
@@ -842,7 +859,7 @@ void loop()
     else {
       timer.GPS_active--;
     }
-#endif // ALARM_GPS 
+#endif // ALARM_GPS
     if (timer.disarmed > 0) {
       timer.disarmed--;
     }
@@ -893,7 +910,7 @@ void loop()
   }
   //  setMspRequests();
 #if defined (FIXEDLOOP) // slower loop speed for consistent analogue readings. 500-1000hz.
-  delay(1);  
+  delay(1);
 #endif //FIXEDLOOP
 }  // End of main loop
 #endif //main loop
@@ -970,8 +987,10 @@ void buildDisplay(void){
 #endif
         }
 #endif
+//  Data received test
+displayHeading();
         displayHeadingGraph();
-        displayHeading();
+    //    displayHeading();
 #if defined SUBMERSIBLE
  #if defined USEMS5837
         MwAltitude = (float)100 * MS5837sensor.depth();
@@ -998,7 +1017,7 @@ void buildDisplay(void){
         displayGPSdop();
         displayCustom();
         // displayfwglidescope(); //note hook for this is in display horizon function
-        if (!armed) 
+        if (!armed)
           GPS_speed = 0;
         display_speed(GPS_speed, GPS_speedPosition, SYM_SPEED_GPS);
         display_speed(AIR_speed, AIR_speedPosition, SYM_SPEED_AIR);
@@ -1007,14 +1026,14 @@ void buildDisplay(void){
 #endif//WIND_SUPPORTED
         displayItem(MAX_speedPosition, speedMAX, SYM_MAX, speedUnitAdd[Settings[S_UNITSYSTEM]], 0 );
         displayGPSPosition();
-#if defined (DISPLAY_VTX_CH) || defined (DISPLAY_VTX_PWR) || defined (DISPLAY_VTX_PWR_MAX) || defined (DISPLAY_VTX_BAND)   
+#if defined (DISPLAY_VTX_CH) || defined (DISPLAY_VTX_PWR) || defined (DISPLAY_VTX_PWR_MAX) || defined (DISPLAY_VTX_BAND)
         displayVTXvalues();
-#endif        
+#endif
 #ifdef GIMBALICON
         displayGimbal();
 #else
         displayBatStatus();
-#endif //GIMBALICON        
+#endif //GIMBALICON
 #ifdef GPSTIME
         if (fieldIsVisible(GPS_timePosition))
           displayDateTime();
@@ -1036,18 +1055,18 @@ void buildDisplay(void){
 #ifdef AAT
         displayAAT();
 #endif //AAT
-#ifdef ADSBAWARE 
+#ifdef ADSBAWARE
         displayADSB();
-#endif // ADSBAWARE 
+#endif // ADSBAWARE
 #ifdef HAS_ALARMS
         displayAlarms();
 #endif
 #ifdef FC_MESSAGE
         displayFCMessage();
 #endif
-#ifdef PHASERS  
+#ifdef PHASERS
         displayPhasers();
-#endif // PHASERS  
+#endif // PHASERS
 #ifdef ADSBSTATION
   displayADSBStation();
 #endif // ADSBSTATION
@@ -1060,7 +1079,7 @@ void buildDisplay(void){
 #endif //DISPALY CHOICE
 
 
-  displayReady = true;    
+  displayReady = true;
 }
 //------------------------------------------------------------------------
 //FONT management
@@ -1181,7 +1200,7 @@ void setMspRequests() {
 #endif
 #ifdef MSP_USE_ANALOG
       REQ_MSP_ANALOG |
-#endif //MSP_USE_ANALOG  
+#endif //MSP_USE_ANALOG
 #ifdef MSPV2
       REQ_MSP2_INAV_AIR_SPEED |
 #endif
@@ -1190,7 +1209,7 @@ void setMspRequests() {
   if (fieldIsVisible(PIDposition))
       modeMSPRequests |=REQ_MSP_PID;
 #endif
-      
+
 #else // else not KISS
 #ifdef KISSGPS
       REQ_MSP_KISS_GPS |
@@ -1200,18 +1219,18 @@ void setMspRequests() {
     if (kissMessageToRequest) {
       modeMSPRequests |= REQ_MSP_KISS_MESSAGE;
     }
-    
+
     // If the version is not yet known, we request it
     if (Kvar.version == 0 || kissSettingsToRequest) {
       modeMSPRequests |= REQ_MSP_KISS_SETTINGS;
     }
 #endif // Not KISS
     if (!armed) {
-      modeMSPRequests |= 
+      modeMSPRequests |=
         REQ_MSP_BOX |
 #if defined INTRO_FC && defined PROTOCOL_MSP
         REQ_MSP_FC_VERSION |
-#endif // INTRO_FC && defined PROTOCOL_MSP      
+#endif // INTRO_FC && defined PROTOCOL_MSP
 #ifdef USE_FC_VOLTS_CONFIG
 #if defined(CLEANFLIGHT) || defined(BETAFLIGHT)
         REQ_MSP_VOLTAGE_METER_CONFIG |
@@ -1226,7 +1245,7 @@ void setMspRequests() {
 #ifdef INFLIGHTTUNING
   if (fieldIsVisible(PIDposition))
       modeMSPRequests |=REQ_MSP_PID;
-#endif        
+#endif
     }
 #if defined MULTIWII_V24
     if (MwSensorActive & mode.gpsmission)
@@ -1269,7 +1288,7 @@ void readEEPROM(void)
     //DDRC &=B11110111;
    #ifndef INTD5
    Settings[S_PWM_PPM] = 0;
-   #endif 
+   #endif
   }
 #endif
 #if defined INTD5
@@ -1278,7 +1297,7 @@ void readEEPROM(void)
   cli();
 #if defined INTC3
   if (Settings[S_MWRSSI] == 1) {
-    #ifdef USE_VSYNC // disable VSYNC to remove RSSI glitches    
+    #ifdef USE_VSYNC // disable VSYNC to remove RSSI glitches
       EIMSK = EIMSK & ~(1 << INT0);
     #endif
     if ((PCMSK1 & (1 << PCINT11)) == 0) {
@@ -1288,7 +1307,7 @@ void readEEPROM(void)
   }
 #endif
 #if defined INTD5
-  #ifdef USE_VSYNC // disable VSYNC to remove RSSI glitches    
+  #ifdef USE_VSYNC // disable VSYNC to remove RSSI glitches
     EIMSK = EIMSK & ~(1 << INT0);
   #endif
   if ((PCMSK2 & (1 << PCINT21)) == 0) {
@@ -1305,7 +1324,8 @@ void readEEPROM(void)
   //VTX power jumper being installed. If we aren't using 5V ref there is
   //the chance we will power up on wrong frequency.
   Settings[S_VREFERENCE] = 1;
-#endif //IMPULSERC_HELIX 
+#endif //IMPULSERC_HELIX
+Settings[S_VREFERENCE] = 1;
 
   if (Settings[S_VREFERENCE])
     analogReference(DEFAULT);
@@ -1391,11 +1411,11 @@ void ProcessSbus(void) {
   for (int i = 1; i <= TX_CHANNELS; i++) {
     MwRcData[i] = sbus.getChannel(i);
   }
-   
+
 #ifdef TX_GUI_CONTROL
   reverseChannels();
 #endif // TX_GUI_CONTROL
-    
+
 }
 #endif // SBUS_CONTROL
 
@@ -1444,12 +1464,12 @@ void ProcessSensors(void) {
       }
     }
     //--- Apply filtering
-#if defined FILTER_AVG   // Use averaged change  
+#if defined FILTER_AVG   // Use averaged change
     sensortemp = sensortemp << (FILTER_SHIFT);
     sensorfilter[sensor][SENSORFILTERSIZE] = sensorfilter[sensor][SENSORFILTERSIZE] - sensorfilter[sensor][sensorindex];
     sensorfilter[sensor][sensorindex] = (sensorfilter[sensor][sensorindex] + sensortemp) >> 1;
     sensorfilter[sensor][SENSORFILTERSIZE] = sensorfilter[sensor][SENSORFILTERSIZE] + sensorfilter[sensor][sensorindex];
-#elif defined FILTER_STD   // Use averaged change  
+#elif defined FILTER_STD   // Use averaged change
     sensorfilter[sensor][SENSORFILTERSIZE] = (sensorfilter[sensor][SENSORFILTERSIZE] - (sensorfilter[sensor][SENSORFILTERSIZE]>>(3+FILTER_STD)) + (sensortemp >> FILTER_STD));
 #else                      // No filtering
     sensorfilter[sensor][SENSORFILTERSIZE] = sensortemp << 3;
@@ -1524,14 +1544,14 @@ void ProcessSensors(void) {
       timer.rssiTimer = 0;
     }
   }
-  rssi_RangeMin = Settings16[S16_RSSIMIN];  
+  rssi_RangeMin = Settings16[S16_RSSIMIN];
   if (Settings16[S16_RSSIMAX]==0) {
     if (rssi > rssi_RangeMax) {
-      rssi_RangeMax=rssi;    
+      rssi_RangeMax=rssi;
     }
   }
   else {
-    rssi_RangeMax = Settings16[S16_RSSIMAX];     
+    rssi_RangeMax = Settings16[S16_RSSIMAX];
   }
   rssi = map(rssi, rssi_RangeMin, rssi_RangeMax, 0, 100);
   rssi = constrain( rssi,0,100);
@@ -1550,20 +1570,20 @@ ISR(PCINT1_vect) { // Default Arduino A3 Atmega C3
   uint8_t l_pinstatus = PINC;
   sei();
   l_PulseDuration = l_CurrentTime - s_LastRising;
-  if ((l_pinstatus & (1 << PWMPIN1))) { // transitioned to high 
+  if ((l_pinstatus & (1 << PWMPIN1))) { // transitioned to high
     s_LastRising = l_CurrentTime;
     if ((l_PulseDuration) > 3000) { //assume this is PPM gap so exit
       return;
-    }    
+    }
   }
-  else{ // // transitioned to low 
+  else{ // // transitioned to low
     if ((900 < l_PulseDuration) && (l_PulseDuration < 2200)) {
 #if defined DEBUG
       pwmval1 = l_PulseDuration;
-#endif      
+#endif
       pwmRSSI = l_PulseDuration;
     }
-  }  
+  }
 }
 #elif defined INTC3
 ISR(PCINT1_vect) { // Default Arduino A3 Atmega C3
@@ -1576,16 +1596,16 @@ ISR(PCINT1_vect) { // Default Arduino A3 Atmega C3
   sei();
   l_PulseDuration = l_CurrentTime - s_LastRising;
 
-  if ((l_pinstatus & (1 << PWMPIN1))) { // transitioned to high 
+  if ((l_pinstatus & (1 << PWMPIN1))) { // transitioned to high
     s_LastRising = l_CurrentTime;
     if ((l_PulseDuration) > 3000) { //assume this is PPM gap so exit
-      s_RCchan = 1; 
+      s_RCchan = 1;
       return;
-    }    
+    }
     if (Settings[S_PWM_PPM]) {//ppm
       if (s_RCchan <= TX_CHANNELS) { // avoid array overflow if > standard ch PPM
         MwRcData[s_RCchan] = l_PulseDuration; // Val updated
-      }   
+      }
       if (s_RCchan == 4){
 #if defined DEBUG
         pwmval1 = l_PulseDuration;
@@ -1597,7 +1617,7 @@ ISR(PCINT1_vect) { // Default Arduino A3 Atmega C3
       s_RCchan++;
     }
   }
-  else{ // // transitioned to low 
+  else{ // // transitioned to low
     if (!Settings[S_PWM_PPM]) {//pwm
       if ((900 < l_PulseDuration) && (l_PulseDuration < 2250)) {
 #if defined DEBUG
@@ -1624,7 +1644,7 @@ ISR(PCINT1_vect) { // Default Arduino A3 Atmega C3
 #endif
       }
     }
-  }  
+  }
 }
 #endif // INTC3
 
@@ -1640,16 +1660,16 @@ ISR(PCINT2_vect) { // // Secondary Arduino D5 Atmega D5
   uint8_t l_pinstatus = PIND;
   sei();
   l_PulseDuration = l_CurrentTime - s_LastRising;
-  if ((l_pinstatus & (1 << PWMPIN2))) { // transitioned to high 
+  if ((l_pinstatus & (1 << PWMPIN2))) { // transitioned to high
     s_LastRising = l_CurrentTime;
     if ((l_PulseDuration) > 3000) { //assume this is PPM gap so exit
-      s_RCchan = 1; 
+      s_RCchan = 1;
       return;
-    }    
+    }
     if (Settings[S_PWM_PPM]) {//ppm
       if (s_RCchan <= TX_CHANNELS) { // avoid array overflow if > standard ch PPM
         MwRcData[s_RCchan] = l_PulseDuration; // Val updated
-      }   
+      }
       if (s_RCchan == 4){
 #if defined DEBUG
         pwmval2 = l_PulseDuration;
@@ -1661,7 +1681,7 @@ ISR(PCINT2_vect) { // // Secondary Arduino D5 Atmega D5
       s_RCchan++;
     }
   }
-  else{ // // transitioned to low 
+  else{ // // transitioned to low
     if (!Settings[S_PWM_PPM]) {//pwm
       if ((950 < l_PulseDuration) && (l_PulseDuration < 2150)) {
         pwmval2 = l_PulseDuration;
@@ -1684,7 +1704,7 @@ ISR(PCINT2_vect) { // // Secondary Arduino D5 Atmega D5
 #endif
       }
     }
-  }    
+  }
 }
 #endif // INTD5
 
@@ -1721,7 +1741,7 @@ void useairspeed() {
   int16_t Pa = map(pressuresensor, -410, 410, -2000, 2000); // Pressure - actual pascals
   AIR_speed = (int32_t)100 * sqrt((2 * Pa) / AIRDENSITY); // Speed required in cm/s
 }
-#endif //USE_AIRSPEED_SENSOR 
+#endif //USE_AIRSPEED_SENSOR
 
 void reverseChannels(void) { //ifdef (TX_REVERSE)
   for (uint8_t i = 1; i <= 4; i++) {
