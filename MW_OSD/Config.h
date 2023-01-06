@@ -4,7 +4,7 @@
 
 /********************       OSD HARDWARE settings      *********************/
 //Choose ONLY ONE option:
-//#define MINIMOSD                  // Uncomment this if using standard MINIMOSD hardware (default)
+#define MINIMOSD                  // Uncomment this if using standard MINIMOSD hardware (default)
 //#define MICROMINIMOSD             // Uncomment this if using the MICRO MINIMOSD hardware
 //#define AEROMAX                   // Uncomment this if using MWOSD AEROMAX hardware
 //#define RTFQV1                    // Uncomment this if using standard RTFQ/Witespy V1.1 OSD, select this to correct for both swapped bat1/bat 2 and to also use alternative resistors / pinouts.
@@ -124,7 +124,7 @@
 /********************       DATE & TIME settings      *********************/
 //Select ONLY if you are sure your OSD is connected to a telemetry feed such as MAVLINK/LTM:
 #define GPSTIME                     // Enable to use GPS time display functions with FC that support features
-//#define DATEFORMAT_UTC            // Display UTC date when enabled - do not use time zone settings. Updated GUI to support non UTC will be released
+#define DATEFORMAT_UTC            // Display UTC date when enabled - do not use time zone settings. Updated GUI to support non UTC will be released
 //#define DATEFORMAT_US             // Display date in US format when used in conjunction with GPSTIME
 //#define MENU_GPS_TIME             // Enable GPS time adjustments in OSD menu
 
@@ -138,7 +138,7 @@
 
 /********************       GPS OSD settings (GPS / NAZA)      *********************/
 #define GPSHOMEFIX         10       // Number of consecutive seconds of valid fixes before home will be set. Max 32
-#define HOMESATFIX          6       // Minimum number of sats required when setting initial home location.
+#define HOMESATFIX          3       // Minimum number of sats required when setting initial home location.
 #define GPSOSDARMDISTANCE  20       // distance from home in meters when GPSOSD arms. Starts flight timer etc.
 //#define GPSOSDHOMEDISTANCE 40     // distance from home in meters when GPSOSD is home. When speed is low it disarms and displays summary screen.
 #define GPSOSDLANDED        8       // seconds OSD needs to have landed (within home distance and speed less than xxx) before triggering summary. Max 32
@@ -156,7 +156,7 @@
 
 
 /********************       GPS settings      *********************/
-#define MINSATFIX 4                 // Number of sats required for a fix. 5 minimum. More = better.
+#define MINSATFIX 3                 // Number of sats required for a fix. 5 minimum. More = better.
 
 
 /********************       ALARM/STATUS settings      *********************/
@@ -278,7 +278,7 @@
 //#define AHILEVEL                    // Enable to display AHI level indicators on sidebars
 //#define APINDICATOR                 // Enable to display AUTOPILOT instead of RTH distance
 //#define GUISENSORS                  // Enable if wish to view raw sensor data on GUI
-#define LONG_RANGE_DISPLAY          // Enable this to for long range display consolidation - displays distance in KM or feet when exceed 9999m or ft.
+//#define LONG_RANGE_DISPLAY          // Enable this to for long range display consolidation - displays distance in KM or feet when exceed 9999m or ft.
 //#define AIRMODE                     // Enable this to display airmode icon.
 //#define MASKGPSLOCATION             // Disable to save memory if not used. Enables MASK GPS settings on GUI. Coordinates displayed with major digits XXX set to random location "XXX.DDDDDDD"
 //#define TEXTMODE                  // Enable to display the flyingmode as text instead of symbols
@@ -357,7 +357,7 @@
 
 /********************       Voltage Settings         ************************/
 //The following variables are available for adjustment of battery icon only
-#define CELL_VOLTS_MIN 32           // Specify the cell voltage at which it is considered empty. Used for battery guage icon only
+#define CELL_VOLTS_MIN 28           // Specify the cell voltage at which it is considered empty. Used for battery guage icon only
 #define CELL_VOLTS_MAX 42           // Specify the max normal LIPO cell voltage. Used for auto cell count determination and battery guage icon
 //#define FC_VOLTAGE_CONFIG         // Additionally uncomment this if you want to use the vbat voltage config with BASEFLIGHT, CLEANFLIGHT and BETAFLIGHT on the flight controller (include: min cell voltage, max cell voltage and warning cell voltage)
 

@@ -926,10 +926,14 @@ void displayAltitude(int32_t t_alt10, int16_t t_pos, uint8_t t_icon) { // alt se
 void displayNumberOfSat(void)
 {
   if (GPS_numSat < MINSATFIX) { // if GPS SATS count failed - check packetrate
+    #ifdef CUSTOM_GPS_DEBUG
     itoa(packetrate, screenBuffer, 10);
       MAX7456_WriteString("P", getPosition(GPS_numSatPosition) + 4);
     MAX7456_WriteString(screenBuffer, getPosition(GPS_numSatPosition) + 5);
-
+    MAX7456_WriteString(debugGPSText, LINE*9+2);
+     MAX7456_WriteString(debugGPSText+28, LINE*10+1);
+     MAX7456_WriteString(debugGPSText+28*2, LINE*11+1);
+    #endif
   }
   if ((GPS_numSat < MINSATFIX) && (timer.Blink2hz)) {
     return;
@@ -2903,13 +2907,15 @@ void displayGPSPosition(void)
     return;
   }
   uint16_t t_position;
-
+if (!GPS_Present && timer.Blink2hz) return;
 #if defined GSPDDMMSS
   t_position = getPosition(MwGPSLatPositionTop);
   FormatGPSCoordDDMMSS(t_position,GPS_latitude, 0) ;
   t_position = getPosition(MwGPSLonPositionTop);
   FormatGPSCoordDDMMSS(t_position,GPS_longitude, 2) ;
 #else
+ 
+
   t_position = getPosition(MwGPSLatPositionTop);
   FormatGPSCoord(t_position,GPS_latitude, 0) ;
   t_position = getPosition(MwGPSLonPositionTop);

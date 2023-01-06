@@ -157,7 +157,7 @@ void MAX7456Setup(void)
   MAX7456SoftReset();
 #endif
 
-  MAX7456ENABLE
+  MAX7456ENABLE;
 
   uint8_t srdata;
   delay(1000/10);                  // Extra delay for input sync detection. 4 frames
@@ -166,20 +166,20 @@ void MAX7456Setup(void)
   spi_transfer(MAX7456ADD_STAT);
   srdata = spi_transfer(0xFF);
   detectedCamType = srdata;
-  detectedCamType &= B00000111;
-  if ((srdata & B00000100) > 0)           // No signal
+  detectedCamType &= 0b00000111;
+  if ((srdata & 0b00000100) > 0)           // No signal
     detectedCamType = 0;
   MAX_screen_size = 390;
   MAX_screen_rows=13;
   MAX7456_reset = 0x08;
-  if (detectedCamType == B00000001){      // PAL
+  if (detectedCamType == 0b00000001){      // PAL
     flags.signaltype = 1;
     flags.signalauto = 1;
     MAX7456_reset = 0x48;
     MAX_screen_size = 480;
     MAX_screen_rows = 16;
     }
-  else if (detectedCamType == B00000010){ // NTSC
+  else if (detectedCamType == 0b00000010){ // NTSC
     flags.signalauto = 0;
   }
 
@@ -197,7 +197,7 @@ void MAX7456Setup(void)
     MAX7456_Send(MAX7456ADD_RB0+x, Settings[S_BRIGHTNESS]);
   }
 #endif
-  MAX7456DISABLE
+  MAX7456DISABLE;
 
 # ifdef USE_VSYNC
   ATOMIC_BLOCK(ATOMIC_RESTORESTATE) {

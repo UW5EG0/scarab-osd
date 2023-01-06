@@ -1,6 +1,12 @@
 // GPS protocol GGA and RMC  sentences are needed
+#define GPSOSD
+#undef NAZA
+#define NMEA
 
+#define GPSTIME
+#define GPS_BAUD 9600
 #if defined(GPSOSD) && !defined(NAZA)
+//#if !defined(NAZA)
 
 #if defined(INIT_MTK_GPS)
 #define MTK_SET_BINARY          PSTR("$PGCMD,16,0,0,0,0,0*6A\r\n")
@@ -37,6 +43,7 @@ struct __GPS_parse{
   int16_t  GPS_ground_course;
   int32_t  GPS_coord[2];
   uint8_t  GPS_Present;
+
 }
 GPS_parse;
 
@@ -178,6 +185,21 @@ void GPS_updateGGA() {
   gpsvario();
 }
 
+void GPS_updateGLL() {
+   GPS_coord[LAT] = GPS_parse.GPS_coord[LAT];
+  GPS_coord[LON] = GPS_parse.GPS_coord[LON];
+ GPS_Present = GPS_parse.GPS_Present;
+  gpsvario();
+
+}
+void GPS_updateGSA() {
+   uint8_t GPS_fix_temp = GPS_parse.GPS_fix;
+  if (GPS_fix_temp) {
+    GPS_fix = 1;
+  }
+  GPS_numSat = GPS_parse.GPS_numSat;
+  
+}
 
 void GPS_reset_home_position() { 
   if (GPS_fix && GPS_numSat >= MINSATFIX) {
@@ -210,6 +232,7 @@ void GPS_distance_cm_bearing(int32_t* lat1, int32_t* lon1, int32_t* lat2, int32_
 
 
 #define DIGIT_TO_VAL(_x)        (_x - '0')
+
 uint32_t GPS_coord_to_degrees(char* s) {
   char *p, *q;
   uint8_t deg = 0, min = 0;
@@ -283,8 +306,230 @@ bool GPS_newFrame(char c) {
 }
 
 #if defined(NMEA)
-#define FRAME_GGA  1
-#define FRAME_RMC  2
+
+enum FRAME_TYPE {FRAME_DTM=1, FRAME_GBS,FRAME_GGA,FRAME_GLL,FRAME_GSA,FRAME_RMC,FRAME_GSV,FRAME_VTG, FRAME_TYPE_COUNT};
+
+#define CUSTOM_NEW_NMEA_FRAME
+//#define CUSTOM_GPS_DEBUG
+//#define CUSTOM_GPS_DEBUG_FRAME FRAME_GLL
+#ifdef CUSTOM_NEW_NMEA_FRAME
+
+/// @brief 
+enum frame_GNSS_ID {FRAME_GNSS_GPS,FRAME_GNSS_GLONASS,FRAME_GNSS_GALLILEO,FRAME_GNSS_GPS_n_GLONASS,FRAME_GNSS_BEIDOU,FRAME_GNSS_GPS_n_BEIDOU,FRAME_GNSS_QZSS, GNSS_ID_COUNT};
+
+const char string_GNSS_ID[GNSS_ID_COUNT][2] = {{'G','P'},{'G','L'},{'G','A'},{'G','N'},{'B','D'},{'G','B'},{'G','Q'},}; 
+
+const char string_FRAME_DTM[] = {'D','T','M',}; // Datum Reference
+const char string_FRAME_GBS[] = {'G','B','S',}; // GNSS Satellite Fault Detection
+const char string_FRAME_GGA[] = {'G','G','A',}; // Global positioning system fix data
+const char string_FRAME_GLL[] = {'G','L','L',}; // Latitude and longitude, with time of position fix and status
+const char string_FRAME_GSA[] = {'G','S','A',}; // GPS DOP and Active Satellites
+const char string_FRAME_GSV[] = {'G','S','V',}; // GPS Satellites in View
+const char string_FRAME_RMC[] = {'R','M','C',}; // Recommended Minimum data
+const char string_FRAME_VTG[] = {'V','T','G',}; // Course over ground and Ground speed
+
+bool GPS_NMEA_newFrame(char c) {
+ static uint8_t frameOK = 0;
+ static char string[15];
+ static uint8_t temp_sat_count = 0;
+ static uint8_t temp_sat_id = 0;
+ static uint8_t param = 0, offset = 0, parity = 0;
+ static uint8_t checksum_param, frame = 0;
+ static int8_t gnss = -1;
+
+  if (c == '$') { //Starting char
+    param = 0; 
+    offset = 0; 
+    parity = 0; 
+    gnss = -1;
+  } else if (c == ',' || c == '*') { // Next param 
+    //parameter processing   
+   if (param == 0){ /*Frame and gnss identification*/
+    uint8_t gnss_index, frame_index;
+    frame = 0;
+    gnss = -1;
+    for (gnss_index = 0; gnss_index < GNSS_ID_COUNT; gnss_index++){
+      if (string[0] == string_GNSS_ID[gnss_index][0] && string[1] == string_GNSS_ID[gnss_index][1]) {
+        gnss = gnss_index;
+         break;
+      }
+    } 
+
+
+    if (memcmp(string+2,string_FRAME_DTM, 3 ) == 0) {frame = FRAME_DTM; }else
+    if (memcmp(string+2,string_FRAME_GBS, 3 ) == 0) {frame = FRAME_GBS; }else
+    if (memcmp(string+2,string_FRAME_GGA, 3 ) == 0) {frame = FRAME_GGA; }else
+    if (memcmp(string+2,string_FRAME_GLL, 3 ) == 0) {frame = FRAME_GLL; }else
+    if (memcmp(string+2,string_FRAME_GSA, 3 ) == 0) {frame = FRAME_GSA; temp_sat_count = 0; }else
+    if (memcmp(string+2,string_FRAME_RMC, 3 ) == 0) {frame = FRAME_RMC; }else
+    if (memcmp(string+2,string_FRAME_GSV, 3 ) == 0) {frame = FRAME_GSV; }else
+    if (memcmp(string+2,string_FRAME_VTG, 3 ) == 0) {frame = FRAME_VTG; }else frame = 0; // unknown data!!!
+
+    #ifdef CUSTOM_GPS_DEBUG
+    if (frame == CUSTOM_GPS_DEBUG_FRAME){
+     debugGPSoffset = 0; memset(debugGPSText, 0, sizeof(debugGPSText)); 
+     memcpy(debugGPSText + debugGPSoffset, string, 5);
+     debugGPSoffset +=5;
+     
+     debugGPSText[debugGPSoffset++] = ',';
+     }
+    
+    #endif
+
+    } else {
+      #ifdef CUSTOM_GPS_DEBUG
+         if (frame == CUSTOM_GPS_DEBUG_FRAME){
+      debugGPSText[debugGPSoffset++] = c;}
+      #endif
+      switch (frame)
+      {
+        case FRAME_RMC:
+              if (param == 7) {
+        GPS_parse.GPS_speed = ((uint32_t)grab_fields(string, 1) * 5144L) / 1000L; //gps speed in cm/s will be used for navigation
+      }
+      else if (param == 8) {
+        GPS_parse.GPS_ground_course = grab_fields(string, 1);  //ground course deg*10
+      }
+
+#ifdef ALARM_GPS
+      timer.GPS_active = ALARM_GPS;
+#endif //ALARM_GPS
+
+        break;
+       case FRAME_GGA:
+      if      (param == 2 && offset > 0) {
+        GPS_parse.GPS_coord[LAT] = GPS_coord_to_degrees(string);
+      }
+      else if (param == 3 && string[0] == 'S') GPS_parse.GPS_coord[LAT] = -GPS_parse.GPS_coord[LAT];
+      else if (param == 4 && offset > 0) {
+        GPS_parse.GPS_coord[LON] = GPS_coord_to_degrees(string);
+      }
+      else if (param == 5 && string[0] == 'W') GPS_parse.GPS_coord[LON] = -GPS_parse.GPS_coord[LON];
+      else if (param == 6 && offset > 0) {
+        GPS_parse.GPS_fix = (string[0]  > '0');
+      }
+      else if (param == 7 && offset > 0) {
+        GPS_parse.GPS_numSat = grab_fields(string, 0);
+      }
+      else if (param == 9 && offset > 0) {
+        GPS_parse.GPS_altitude = grab_fields(string, 0); // altitude in meters added by Mis
+      }
+    
+
+        break;
+        case FRAME_GLL:
+     if      (param == 1 && offset > 0)                     {
+      //  memcpy(string,"4828.18168",12); 
+
+        GPS_parse.GPS_coord[LAT] = GPS_coord_to_degrees(string);
+   //     GPS_coord[LAT] = GPS_parse.GPS_coord[LAT];
+    
+      }
+      else if (param == 2  && offset > 0 && string[0] == 'S') GPS_parse.GPS_coord[LAT] = -GPS_parse.GPS_coord[LAT];
+      else if (param == 3  && offset > 0)                     {
+     //   memcpy(string,"03502.46214",12); 
+        GPS_parse.GPS_coord[LON] = GPS_coord_to_degrees(string);
+     //   GPS_coord[LON] = GPS_parse.GPS_coord[LON];
+      }
+      else if (param == 4 && string[0] == 'W' && offset > 0) GPS_parse.GPS_coord[LON] = -GPS_parse.GPS_coord[LON];
+      else if (param == 5) {
+        datetime.hours = (string[0]-'0')*10 +(string[1]-'0') ;
+        datetime.minutes = (string[2]-'0')*10 +(string[3]-'0');
+        datetime.seconds = (string[4]-'0')*10 +(string[5]-'0');
+        datetime.unixtime = GPS_time = 42239 + datetime.hours * 3600 + datetime.minutes * 60 + datetime.seconds;
+        updateDateTime(datetime.unixtime);
+        setDateTime();
+        
+      }
+      else if (param == 6) GPS_parse.GPS_Present = (string[0] == 'A');
+        break;
+
+      case FRAME_GSA:
+        if (param == 2)
+         {
+        GPS_parse.GPS_fix = (string[0] > '1');
+         }
+         if (param >= 3 && param <=14) { //satellite identifers
+          if (offset > 0) {temp_sat_count++;}
+         }
+        if (param == 16) // HDOP
+        {
+          GPS_dop = grab_fields(string, 2);
+        }
+         if (param == 18) // GNSS ID 
+         {
+        /*
+        1 = GPS L1C/A, L2CL, L2CM
+        2 = GLONASS L1 OF, L2 OF
+        3 = Galileo E1C, E1B, E5 bl, E5 bQ
+        4 = BeiDou B1I D1, B1I D2, B2I D1, B2I D12
+        5 = QZSS
+*/
+          if (string[0]-'5') {
+            GPS_parse.GPS_numSat = temp_sat_count;
+            temp_sat_count = 0;
+          } 
+              
+         }
+        break;
+      
+      default:
+        break;
+      }
+
+    }
+
+   
+    //END parameter processing
+
+    param++;
+    offset = 0;
+    if (c == '*') checksum_param = 1; // next param is checksum
+    else parity ^= c; 
+
+  } else if (c == '\r' || c == '\n') // NEW_LINE
+      {
+        #ifdef CUSTOM_GPS_DEBUG
+       if (frame == CUSTOM_GPS_DEBUG_FRAME) debugGPSText[debugGPSoffset++] = ' ';
+       #endif
+        //process checksum param
+         if (checksum_param) { //parity checksum
+      uint8_t checksum = hex_c(string[0]);
+      checksum <<= 4;
+      checksum += hex_c(string[1]);
+      if (checksum == parity) {
+     
+         timer.packetcount++;
+        frameOK = 1;
+     
+  
+        switch (frame) {
+       //   case FRAME_DTM:  memcpy(debugGPSText + debugGPSoffset,string_FRAME_DTM, 3 );  debugGPSoffset +=3;  break;
+       //   case FRAME_GBS:  memcpy(debugGPSText + debugGPSoffset,string_FRAME_GBS, 3 );  debugGPSoffset +=3;  break;
+          case FRAME_GGA: GPS_updateGGA(); break;
+          case FRAME_GLL: GPS_updateGLL();  break;
+          case FRAME_GSA: GPS_updateGSA();  break;
+          case FRAME_RMC: GPS_updateRMC();  break;
+       //   case FRAME_GSV: memcpy(debugGPSText + debugGPSoffset,string_FRAME_GSV, 3 );  debugGPSoffset +=3; break;
+       //   case FRAME_VTG:  memcpy(debugGPSText + debugGPSoffset,string_FRAME_VTG, 3 );  debugGPSoffset +=3;  break;
+         }
+        }
+      }
+    checksum_param = 0;
+
+      } else { //any other char
+    if (offset < 15) string[offset++] = c; 
+    #ifdef CUSTOM_GPS_DEBUG
+    if (frame == CUSTOM_GPS_DEBUG_FRAME) {
+      debugGPSText[debugGPSoffset++] = c;
+      }
+      #endif
+        if (!checksum_param) parity ^= c;   
+      }
+      if (frame != 0) GPS_Present = 1;
+    return frameOK && (frame == FRAME_GGA || frame == FRAME_GLL);
+}
+#else // old realisation
 
 bool GPS_NMEA_newFrame(char c) {
   uint8_t frameOK = 0;
@@ -359,8 +604,10 @@ bool GPS_NMEA_newFrame(char c) {
   }
   if (frame) GPS_Present = 1;
   return frameOK && (frame == FRAME_GGA);
-}
+} 
+#endif // not CUSTOM_NEW_FRAME
 #endif //NMEA
+
 
 #if defined(UBLOX)
 struct ubx_header {
@@ -785,8 +1032,8 @@ void     GPSOSDcalculate(){
   //calculate distance. bearings etc
   uint32_t dist;
   int32_t  dir;
-  if (GPS_numSat < 5)
-    return;
+ /* if (GPS_numSat < MINSATFIX)
+    return;*/
   GPS_distance_cm_bearing(&GPS_coord[LAT], &GPS_coord[LON], &GPS_home[LAT], &GPS_home[LON], &dist, &dir);
   GPS_distanceToHome = dist / 100;
   GPS_directionToHome = dir / 100;

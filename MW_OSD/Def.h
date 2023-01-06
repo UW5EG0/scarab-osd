@@ -724,12 +724,15 @@
     #define FIXEDWING
   #endif
 #endif
+
+
 #if defined GPSOSD_NMEA
   #define NMEA
   #ifndef ROTORCRAFT
     #define FIXEDWING
   #endif
 #endif
+
 #if defined GPSOSD_MTK
   #define MTK
   #ifndef ROTORCRAFT

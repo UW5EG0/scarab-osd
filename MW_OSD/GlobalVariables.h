@@ -241,6 +241,10 @@ char screen[480];          // Main screen ram for MAX7456
 uint8_t screenAttr[480/8]; // Attribute (INV) bits for each char in screen[]
 #endif
 char screenBuffer[20];
+char debugGPSText[LINE*2] = {0,};
+uint8_t requiredDebugDetected = 2;
+
+uint8_t debugGPSoffset = 0;
 uint32_t modeMSPRequests;
 uint32_t queuedMSPRequests;
 uint8_t sensorpinarray[]={VOLTAGEPIN,VIDVOLTAGEPIN,AMPERAGEPIN,AUXPIN,RSSIPIN};
@@ -874,7 +878,7 @@ PROGMEM const uint16_t SCREENLAYOUT_DEFAULT[POSITIONS_SETTINGS] = {
 (LINE01+3)|DISPLAY_NEVER,                 // Special function do not use
 (LINE01+7)|DISPLAY_NEVER,                 // Special function do not use
 (LINE04+2)|DISPLAY_NEVER|DISPLAY_DEV,     // Batstatus% Position (mavlink)
-(LINE09+11)|DISPLAY_NEVER|DISPLAY_DEV,    // GPS_time Position
+(LINE13+12)|DISPLAY_ALWAYS|DISPLAY_DEV,    // GPS_time Position
 (LINE09+22)|DISPLAY_NEVER|DISPLAY_DEV,    // SportPosition
 (LINE03+2)|DEF_modePosition|DISPLAY_DEV,  // modePosition
 (LINE02+22)|DISPLAY_NEVER,                // MapModePosition
@@ -892,7 +896,7 @@ PROGMEM const uint16_t SCREENLAYOUT_DEFAULT[POSITIONS_SETTINGS] = {
 (LINE08+8)|DISPLAY_NEVER|DISPLAY_DEV,     // TotalDistanceposition
 (LINE03+22)|DISPLAY_NEVER|DISPLAY_DEV,    // WIND_speedposition,
 (LINE06+8)|DISPLAY_NEVER|DISPLAY_DEV,     // MaxDistanceposition
-(LINE05+2)|DISPLAY_NEVER|DISPLAY_DEV,     // DOPposition
+(LINE05+2)|DISPLAY_ALWAYS|DISPLAY_DEV,     // DOPposition
 (LINE03+10)|DISPLAY_NEVER|DISPLAY_DEV,    // ADSBposition
 (LINE04+10)|DISPLAY_NEVER|DISPLAY_DEV,    // VTXPosition
 (LINE04+2)|DISPLAY_NEVER|DISPLAY_DEV,     // Cellposition
