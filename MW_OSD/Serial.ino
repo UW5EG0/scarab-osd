@@ -1669,7 +1669,7 @@ void serialMSPreceive(uint8_t loops)
     timer.serialrxrate++;
   #endif
 #endif
-
+#define GPSOSD
     #ifdef GPSOSD
       armedtimer = 0;
       #if defined (NAZA)
@@ -1678,7 +1678,7 @@ void serialMSPreceive(uint8_t loops)
         if (GPS_newFrame(c)) GPS_NewData();
       #endif //NAZA
     #endif //GPSOSD
-
+ 
     if (!fontMode){
       #if defined (PROTOCOL_SKYTRACK)
         serialSLreceive(c);
